@@ -151,16 +151,15 @@
 
       playPauseBtn.onclick = () => {
         if (audio.paused) {
-          audio.play();
-          playPauseBtn.textContent = '⏸';
+          audio.play().catch(() => {});
         } else {
           audio.pause();
-          playPauseBtn.textContent = '▶';
         }
       };
 
-      audio.addEventListener('play', () => { playPauseBtn.textContent = '⏸'; });
+      audio.addEventListener('play',  () => { playPauseBtn.textContent = '⏸'; });
       audio.addEventListener('pause', () => { playPauseBtn.textContent = '▶'; });
+      audio.addEventListener('error', () => { playPauseBtn.textContent = '▶'; console.warn('Audio failed to load:', track.file); });
 
       audio.addEventListener('timeupdate', () => {
         if (audio.duration) {
