@@ -16,6 +16,10 @@ const MUSIC_TRACKS = [
     "file": "assets/music/Tahoe with the boys.mp3"
   },
   {
+    "title": "The Stag of El Rocco",
+    "file": "assets/music/The Stag of El Rocco.mp3"
+  },
+  {
     "title": "The Tahoe Thin Air",
     "file": "assets/music/The Tahoe Thin Air.mp3"
   }
