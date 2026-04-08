@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photos — Myles's Bachelor Party</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/inner.css">
+</head>
+<body>
+
+  <div class="bokeh-container">
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+  </div>
+
+  <div class="container">
+
+    <header class="inner-header">
+      <a href="index.html" class="back-link">← Back to Hub</a>
+      <h1>Upload Photos</h1>
+      <p class="subtitle">Capture the Moments</p>
+      <div class="status-bar" id="firebaseStatus">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Connecting to Firebase...</span>
+      </div>
+    </header>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <!-- Upload Zone -->
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-icon">📷</div>
+      <p>Drag & drop photos here</p>
+      <div class="or">or</div>
+      <button class="btn" onclick="document.getElementById('fileInput').click()">Browse Files</button>
+      <input type="file" id="fileInput" multiple accept="image/*" style="display:none">
+    </div>
+
+    <!-- Upload Queue -->
+    <div class="upload-queue" id="uploadQueue"></div>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <!-- Gallery -->
+    <h2 style="text-align:center; margin-bottom: 8px;">Gallery</h2>
+    <p style="text-align:center; font-size:0.8rem; color:var(--text-muted); margin-bottom: 24px;">Click any photo to view full size</p>
+    <div class="gallery-grid" id="gallery"></div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+      <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+      <img id="lightboxImg" src="" alt="Full size photo">
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-stats">
+        <span>1 Groom to Send Off</span><span>·</span>
+        <span>∞ Memories Made</span><span>·</span>
+        <span>Tahoe</span>
+      </div>
+      <div class="footer-quote">
+        "I'll fight with everything I have!"<br>
+        <span class="attribution">— Roy · Super Smash Bros. Melee</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+    import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js';
+    import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBFxIU0P2v1nFFBVdvTAqjh86-duehVfdI",
+      authDomain: "bach-party-photos.firebaseapp.com",
+      projectId: "bach-party-photos",
+      storageBucket: "bach-party-photos.firebasestorage.app",
+      messagingSenderId: "818312719919",
+      appId: "1:818312719919:web:c988eb056286e2b01be0da"
+    };
+
+    let app, storage, db;
+    let firebaseReady = false;
+
+    try {
+      app = initializeApp(firebaseConfig);
+      storage = getStorage(app);
+      db = getFirestore(app);
+      firebaseReady = true;
+      document.getElementById('statusDot').classList.remove('offline');
+      document.getElementById('statusText').textContent = 'Firebase Connected';
+    } catch (e) {
+      console.error('Firebase init failed:', e);
+      document.getElementById('statusDot').classList.add('offline');
+      document.getElementById('statusText').textContent = 'Firebase Offline — Using Local Storage';
+    }
+
+    // Upload Zone drag/drop
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadQueue = document.getElementById('uploadQueue');
+
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+      fileInput.value = '';
+    });
+
+    function handleFiles(files) {
+      Array.from(files).forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+        uploadFile(file);
+      });
+    }
+
+    function uploadFile(file) {
+      const item = document.createElement('div');
+      item.className = 'upload-item';
+      item.innerHTML = `
+        <span class="filename">${file.name}</span>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        <span class="status-text">0%</span>
+      `;
+      uploadQueue.appendChild(item);
+
+      const fill = item.querySelector('.progress-fill');
+      const statusText = item.querySelector('.status-text');
+
+      if (firebaseReady) {
+        const fileRef = storageRef(storage, `photos/${Date.now()}_${file.name}`);
+        const task = uploadBytesResumable(fileRef, file);
+
+        task.on('state_changed',
+          (snap) => {
+            const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+            fill.style.width = pct + '%';
+            statusText.textContent = pct + '%';
+          },
+          (err) => {
+            statusText.textContent = 'Error';
+            fill.style.background = '#f87171';
+            saveToLocal(file);
+          },
+          async () => {
+            const url = await getDownloadURL(fileRef);
+            await addDoc(collection(db, 'photos'), {
+              url,
+              name: file.name,
+              timestamp: serverTimestamp()
+            });
+            statusText.textContent = 'Done';
+            fill.style.width = '100%';
+            loadGallery();
+          }
+        );
+      } else {
+        saveToLocal(file);
+        fill.style.width = '100%';
+        statusText.textContent = 'Local';
+      }
+    }
+
+    function saveToLocal(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const photos = JSON.parse(localStorage.getItem('mbp_photos') || '[]');
+        photos.push({ url: reader.result, name: file.name, timestamp: Date.now() });
+        localStorage.setItem('mbp_photos', JSON.stringify(photos));
+        loadGallery();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function loadGallery() {
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '';
+      let photos = [];
+
+      if (firebaseReady) {
+        try {
+          const q = query(collection(db, 'photos'), orderBy('timestamp', 'desc'));
+          const snap = await getDocs(q);
+          snap.forEach(doc => photos.push(doc.data()));
+        } catch (e) {
+          console.error('Gallery load error:', e);
+        }
+      }
+
+      // Merge local photos
+      const local = JSON.parse(localStorage.getItem('mbp_photos') || '[]');
+      const allUrls = new Set(photos.map(p => p.url));
+      local.forEach(p => {
+        if (!allUrls.has(p.url)) photos.push(p);
+      });
+
+      photos.forEach(photo => {
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+        div.innerHTML = `<img src="${photo.url}" alt="${photo.name || 'Photo'}" loading="lazy">`;
+        div.onclick = () => openLightbox(photo.url);
+        gallery.appendChild(div);
+      });
+    }
+
+    window.openLightbox = function(url) {
+      document.getElementById('lightboxImg').src = url;
+      document.getElementById('lightbox').classList.add('active');
+    };
+
+    window.closeLightbox = function() {
+      document.getElementById('lightbox').classList.remove('active');
+    };
+
+    document.getElementById('lightbox').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeLightbox();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+
+    // Initial gallery load
+    loadGallery();
+  </script>
+
+  <script src="js/shared.js"></script>
+</body>
+</html>

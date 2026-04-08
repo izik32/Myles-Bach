@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memories — Myles's Bachelor Party</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/inner.css">
+</head>
+<body>
+
+  <!-- Start Overlay -->
+  <div class="start-overlay" id="startOverlay">
+    <h2>Memories</h2>
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+    <p>Click anywhere to begin the slideshow</p>
+    <p style="margin-top:8px; font-size:0.7rem; color:var(--text-muted);">
+      <a href="index.html" style="color:var(--text-muted);">← Back to Hub</a>
+    </p>
+  </div>
+
+  <!-- Slideshow Container -->
+  <div class="slideshow-container" id="slideshow">
+    <div id="slidesWrapper"></div>
+  </div>
+
+  <!-- Controls Overlay -->
+  <div class="slideshow-overlay" id="controlsOverlay" style="display:none;">
+    <!-- Back link -->
+    <a href="index.html" style="position:fixed; top:20px; left:20px; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); z-index:102; pointer-events:all;">← Hub</a>
+
+    <!-- Music Player -->
+    <div class="music-player" id="musicPlayer">
+      <button class="play-pause" id="playPauseBtn">▶</button>
+      <div class="track-info">
+        <div class="track-name" id="trackName">Loading...</div>
+        <div class="music-progress" id="musicProgress">
+          <div class="music-progress-fill" id="musicProgressFill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide Controls -->
+    <div class="slideshow-controls">
+      <button class="slide-btn" id="prevBtn">‹</button>
+      <div class="slide-dots" id="slideDots"></div>
+      <button class="slide-btn" id="nextBtn">›</button>
+    </div>
+  </div>
+
+  <script src="config/music.js"></script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+    import { getFirestore, collection, getDocs, orderBy, query } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBFxIU0P2v1nFFBVdvTAqjh86-duehVfdI",
+      authDomain: "bach-party-photos.firebaseapp.com",
+      projectId: "bach-party-photos",
+      storageBucket: "bach-party-photos.firebasestorage.app",
+      messagingSenderId: "818312719919",
+      appId: "1:818312719919:web:c988eb056286e2b01be0da"
+    };
+
+    let photos = [];
+    let currentSlide = 0;
+    let slideInterval = null;
+    let audio = null;
+
+    // Load photos
+    async function loadPhotos() {
+      try {
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const q = query(collection(db, 'photos'), orderBy('timestamp', 'desc'));
+        const snap = await getDocs(q);
+        snap.forEach(doc => photos.push(doc.data()));
+      } catch (e) {
+        console.log('Firebase unavailable, using localStorage');
+      }
+
+      // Merge local
+      const local = JSON.parse(localStorage.getItem('mbp_photos') || '[]');
+      const urls = new Set(photos.map(p => p.url));
+      local.forEach(p => { if (!urls.has(p.url)) photos.push(p); });
+
+      if (photos.length === 0) {
+        photos = [
+          { url: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect fill="#0c1014" width="800" height="600"/><text x="400" y="280" text-anchor="middle" fill="#c9a55a" font-size="24" font-family="Georgia">Upload photos first</text><text x="400" y="320" text-anchor="middle" fill="#685f50" font-size="14" font-family="sans-serif">Head to the Photos page to get started</text></svg>'), name: 'placeholder' }
+        ];
+      }
+
+      buildSlides();
+    }
+
+    function buildSlides() {
+      const wrapper = document.getElementById('slidesWrapper');
+      const dots = document.getElementById('slideDots');
+      wrapper.innerHTML = '';
+      dots.innerHTML = '';
+
+      photos.forEach((photo, i) => {
+        const slide = document.createElement('div');
+        slide.className = 'slide' + (i === 0 ? ' active' : '');
+        slide.innerHTML = `<img src="${photo.url}" alt="${photo.name || 'Memory'}">`;
+        wrapper.appendChild(slide);
+
+        const dot = document.createElement('div');
+        dot.className = 'slide-dot' + (i === 0 ? ' active' : '');
+        dot.onclick = () => goToSlide(i);
+        dots.appendChild(dot);
+      });
+    }
+
+    function goToSlide(index) {
+      const slides = document.querySelectorAll('.slide');
+      const dots = document.querySelectorAll('.slide-dot');
+      slides[currentSlide]?.classList.remove('active');
+      dots[currentSlide]?.classList.remove('active');
+      currentSlide = (index + photos.length) % photos.length;
+      slides[currentSlide]?.classList.add('active');
+      dots[currentSlide]?.classList.add('active');
+    }
+
+    function nextSlide() { goToSlide(currentSlide + 1); }
+    function prevSlide() { goToSlide(currentSlide - 1); }
+
+    function startSlideshow() {
+      if (slideInterval) clearInterval(slideInterval);
+      slideInterval = setInterval(nextSlide, 6000);
+    }
+
+    // Music
+    function initMusic() {
+      if (typeof MUSIC_TRACKS === 'undefined' || MUSIC_TRACKS.length === 0) {
+        document.getElementById('trackName').textContent = 'No tracks available';
+        return;
+      }
+
+      const track = getRandomTrack();
+      if (!track) return;
+
+      audio = new Audio(track.file);
+      audio.loop = true;
+      document.getElementById('trackName').textContent = track.title;
+
+      const playPauseBtn = document.getElementById('playPauseBtn');
+      const progressFill = document.getElementById('musicProgressFill');
+
+      audio.play().catch(() => {});
+
+      playPauseBtn.onclick = () => {
+        if (audio.paused) {
+          audio.play();
+          playPauseBtn.textContent = '⏸';
+        } else {
+          audio.pause();
+          playPauseBtn.textContent = '▶';
+        }
+      };
+
+      audio.addEventListener('play', () => { playPauseBtn.textContent = '⏸'; });
+      audio.addEventListener('pause', () => { playPauseBtn.textContent = '▶'; });
+
+      audio.addEventListener('timeupdate', () => {
+        if (audio.duration) {
+          progressFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+        }
+      });
+
+      document.getElementById('musicProgress').onclick = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const pct = (e.clientX - rect.left) / rect.width;
+        audio.currentTime = pct * audio.duration;
+      };
+    }
+
+    // Start
+    document.getElementById('startOverlay').onclick = () => {
+      document.getElementById('startOverlay').classList.add('hidden');
+      document.getElementById('controlsOverlay').style.display = '';
+      startSlideshow();
+      initMusic();
+    };
+
+    document.getElementById('prevBtn').onclick = () => {
+      prevSlide();
+      startSlideshow(); // Reset timer
+    };
+
+    document.getElementById('nextBtn').onclick = () => {
+      nextSlide();
+      startSlideshow();
+    };
+
+    // Keyboard
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('startOverlay').classList.contains('hidden')) {
+        if (e.key === 'ArrowRight') { nextSlide(); startSlideshow(); }
+        if (e.key === 'ArrowLeft') { prevSlide(); startSlideshow(); }
+        if (e.key === ' ') {
+          e.preventDefault();
+          if (audio) {
+            audio.paused ? audio.play() : audio.pause();
+          }
+        }
+      }
+    });
+
+    loadPhotos();
+  </script>
+</body>
+</html>

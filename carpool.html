@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carpooling — Myles's Bachelor Party</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/inner.css">
+</head>
+<body>
+
+  <div class="bokeh-container">
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+  </div>
+
+  <div class="container">
+
+    <header class="inner-header">
+      <a href="index.html" class="back-link">← Back to Hub</a>
+      <h1>Carpooling</h1>
+      <p class="subtitle">Coordinate Rides to Tahoe</p>
+      <div class="status-bar" id="carpoolStatus">
+        <span class="status-dot" id="carpoolDot"></span>
+        <span id="carpoolStatusText">Connecting...</span>
+      </div>
+    </header>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <!-- I'm Driving -->
+    <section class="carpool-section">
+      <h2>🚗 I'm Driving</h2>
+      <div class="carpool-form" id="driverForm">
+        <input type="text" id="driverName" placeholder="Your name">
+        <input type="text" id="driverCity" placeholder="Departure city / area">
+        <input type="text" id="driverTime" placeholder="Departure time (e.g. Fri 2pm)">
+        <input type="number" id="driverSeats" placeholder="Seats available" min="1" max="8">
+      </div>
+      <button class="btn btn-primary" onclick="addDriver()">Sign Up as Driver</button>
+      <div class="carpool-list" id="driverList" style="margin-top:20px;"></div>
+    </section>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <!-- I Need a Ride -->
+    <section class="carpool-section">
+      <h2>🙋 I Need a Ride</h2>
+      <div class="carpool-form" id="riderForm">
+        <input type="text" id="riderName" placeholder="Your name">
+        <input type="text" id="riderArea" placeholder="Pickup area">
+        <input type="text" id="riderNotes" placeholder="Notes (optional)">
+      </div>
+      <button class="btn btn-primary" onclick="addRider()">Sign Up for a Ride</button>
+      <div class="carpool-list" id="riderList" style="margin-top:20px;"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-stats">
+        <span>1 Groom to Send Off</span><span>·</span>
+        <span>∞ Memories Made</span><span>·</span>
+        <span>Tahoe</span>
+      </div>
+      <div class="footer-quote">
+        "I'll fight with everything I have!"<br>
+        <span class="attribution">— Roy · Super Smash Bros. Melee</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, serverTimestamp, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBFxIU0P2v1nFFBVdvTAqjh86-duehVfdI",
+      authDomain: "bach-party-photos.firebaseapp.com",
+      projectId: "bach-party-photos",
+      storageBucket: "bach-party-photos.firebasestorage.app",
+      messagingSenderId: "818312719919",
+      appId: "1:818312719919:web:c988eb056286e2b01be0da"
+    };
+
+    let db;
+    let firebaseReady = false;
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      firebaseReady = true;
+      document.getElementById('carpoolDot').classList.remove('offline');
+      document.getElementById('carpoolStatusText').textContent = 'Firebase Connected — Real-time Sync';
+    } catch (e) {
+      console.error('Firebase init failed:', e);
+      document.getElementById('carpoolDot').classList.add('offline');
+      document.getElementById('carpoolStatusText').textContent = 'Offline Mode';
+    }
+
+    // ========== Drivers ==========
+    window.addDriver = async function() {
+      const name = document.getElementById('driverName').value.trim();
+      const city = document.getElementById('driverCity').value.trim();
+      const time = document.getElementById('driverTime').value.trim();
+      const seats = document.getElementById('driverSeats').value.trim();
+
+      if (!name || !city) return alert('Name and departure city are required');
+
+      const entry = { name, city, time, seats: parseInt(seats) || 1, type: 'driver', timestamp: Date.now() };
+
+      if (firebaseReady) {
+        await addDoc(collection(db, 'carpool_drivers'), { ...entry, timestamp: serverTimestamp() });
+      } else {
+        const drivers = JSON.parse(localStorage.getItem('mbp_drivers') || '[]');
+        drivers.push(entry);
+        localStorage.setItem('mbp_drivers', JSON.stringify(drivers));
+        renderDrivers();
+      }
+
+      document.getElementById('driverName').value = '';
+      document.getElementById('driverCity').value = '';
+      document.getElementById('driverTime').value = '';
+      document.getElementById('driverSeats').value = '';
+    };
+
+    window.removeDriver = async function(id) {
+      if (firebaseReady) {
+        await deleteDoc(doc(db, 'carpool_drivers', id));
+      } else {
+        let drivers = JSON.parse(localStorage.getItem('mbp_drivers') || '[]');
+        drivers = drivers.filter((_, i) => i !== parseInt(id));
+        localStorage.setItem('mbp_drivers', JSON.stringify(drivers));
+        renderDrivers();
+      }
+    };
+
+    function renderDrivers(drivers) {
+      const container = document.getElementById('driverList');
+      if (!drivers || drivers.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:16px;">No drivers signed up yet</p>';
+        return;
+      }
+
+      container.innerHTML = drivers.map(d => `
+        <div class="carpool-card">
+          <div class="driver-info">
+            <span class="driver-name">${d.name}</span>
+            <span class="driver-details">From ${d.city} · ${d.time || 'TBD'} · ${d.seats || '?'} seat${d.seats !== 1 ? 's' : ''} available</span>
+          </div>
+          <button class="remove-btn" onclick="removeDriver('${d.id}')">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    // ========== Riders ==========
+    window.addRider = async function() {
+      const name = document.getElementById('riderName').value.trim();
+      const area = document.getElementById('riderArea').value.trim();
+      const notes = document.getElementById('riderNotes').value.trim();
+
+      if (!name || !area) return alert('Name and pickup area are required');
+
+      const entry = { name, area, notes, type: 'rider', timestamp: Date.now() };
+
+      if (firebaseReady) {
+        await addDoc(collection(db, 'carpool_riders'), { ...entry, timestamp: serverTimestamp() });
+      } else {
+        const riders = JSON.parse(localStorage.getItem('mbp_riders') || '[]');
+        riders.push(entry);
+        localStorage.setItem('mbp_riders', JSON.stringify(riders));
+        renderRiders();
+      }
+
+      document.getElementById('riderName').value = '';
+      document.getElementById('riderArea').value = '';
+      document.getElementById('riderNotes').value = '';
+    };
+
+    window.removeRider = async function(id) {
+      if (firebaseReady) {
+        await deleteDoc(doc(db, 'carpool_riders', id));
+      } else {
+        let riders = JSON.parse(localStorage.getItem('mbp_riders') || '[]');
+        riders = riders.filter((_, i) => i !== parseInt(id));
+        localStorage.setItem('mbp_riders', JSON.stringify(riders));
+        renderRiders();
+      }
+    };
+
+    function renderRiders(riders) {
+      const container = document.getElementById('riderList');
+      if (!riders || riders.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:16px;">No riders signed up yet</p>';
+        return;
+      }
+
+      container.innerHTML = riders.map(r => `
+        <div class="carpool-card">
+          <div class="driver-info">
+            <span class="driver-name">${r.name}</span>
+            <span class="driver-details">Pickup: ${r.area}${r.notes ? ' · ' + r.notes : ''}</span>
+          </div>
+          <button class="remove-btn" onclick="removeRider('${r.id}')">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    // ========== Real-time listeners ==========
+    if (firebaseReady) {
+      const driversQuery = query(collection(db, 'carpool_drivers'), orderBy('timestamp', 'desc'));
+      onSnapshot(driversQuery, (snap) => {
+        const drivers = [];
+        snap.forEach(d => drivers.push({ id: d.id, ...d.data() }));
+        renderDrivers(drivers);
+      });
+
+      const ridersQuery = query(collection(db, 'carpool_riders'), orderBy('timestamp', 'desc'));
+      onSnapshot(ridersQuery, (snap) => {
+        const riders = [];
+        snap.forEach(d => riders.push({ id: d.id, ...d.data() }));
+        renderRiders(riders);
+      });
+    } else {
+      // Load from localStorage
+      function renderDrivers() {
+        const drivers = JSON.parse(localStorage.getItem('mbp_drivers') || '[]').map((d, i) => ({ ...d, id: String(i) }));
+        const container = document.getElementById('driverList');
+        if (drivers.length === 0) {
+          container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:16px;">No drivers signed up yet</p>';
+          return;
+        }
+        container.innerHTML = drivers.map(d => `
+          <div class="carpool-card">
+            <div class="driver-info">
+              <span class="driver-name">${d.name}</span>
+              <span class="driver-details">From ${d.city} · ${d.time || 'TBD'} · ${d.seats || '?'} seat${d.seats !== 1 ? 's' : ''} available</span>
+            </div>
+            <button class="remove-btn" onclick="removeDriver('${d.id}')">Remove</button>
+          </div>
+        `).join('');
+      }
+
+      function renderRiders() {
+        const riders = JSON.parse(localStorage.getItem('mbp_riders') || '[]').map((r, i) => ({ ...r, id: String(i) }));
+        const container = document.getElementById('riderList');
+        if (riders.length === 0) {
+          container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:16px;">No riders signed up yet</p>';
+          return;
+        }
+        container.innerHTML = riders.map(r => `
+          <div class="carpool-card">
+            <div class="driver-info">
+              <span class="driver-name">${r.name}</span>
+              <span class="driver-details">Pickup: ${r.area}${r.notes ? ' · ' + r.notes : ''}</span>
+            </div>
+            <button class="remove-btn" onclick="removeRider('${r.id}')">Remove</button>
+          </div>
+        `).join('');
+      }
+
+      renderDrivers();
+      renderRiders();
+    }
+  </script>
+
+  <script src="js/shared.js"></script>
+</body>
+</html>

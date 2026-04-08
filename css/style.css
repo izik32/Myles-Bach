@@ -1,0 +1,507 @@
+/* ============================================
+   MYLES'S BACHELOR PARTY 2026
+   Dark Luxury Theme — Main Stylesheet
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Jost:wght@300;400;500;600;700&display=swap');
+
+/* --- CSS Variables --- */
+:root {
+  --obsidian: #05080a;
+  --obsidian-light: #0c1014;
+  --obsidian-mid: #111820;
+  --champagne: #c9a55a;
+  --champagne-light: #e8c97a;
+  --champagne-glow: rgba(201, 165, 90, 0.15);
+  --emerald: #1a3328;
+  --emerald-bright: #2a5a42;
+  --crimson: #7a2020;
+  --crimson-bright: #a03030;
+  --text-primary: #e8e0d0;
+  --text-secondary: #a09880;
+  --text-muted: #685f50;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Jost', 'Helvetica Neue', sans-serif;
+  --gold-border: 1px solid rgba(201, 165, 90, 0.2);
+  --card-bg: rgba(12, 16, 20, 0.8);
+  --card-hover: rgba(20, 26, 34, 0.9);
+}
+
+/* --- Reset & Base --- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--obsidian);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* --- Grain Texture Overlay --- */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* --- Bokeh Particles --- */
+.bokeh-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bokeh-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0;
+  animation: bokehFloat 12s ease-in-out infinite;
+}
+
+.bokeh-orb:nth-child(1) {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(201, 165, 90, 0.08), transparent 70%);
+  top: 10%;
+  left: 15%;
+  animation-delay: 0s;
+  animation-duration: 15s;
+}
+
+.bokeh-orb:nth-child(2) {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(232, 201, 122, 0.06), transparent 70%);
+  top: 50%;
+  right: 10%;
+  animation-delay: 3s;
+  animation-duration: 18s;
+}
+
+.bokeh-orb:nth-child(3) {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(201, 165, 90, 0.05), transparent 70%);
+  bottom: 20%;
+  left: 40%;
+  animation-delay: 6s;
+  animation-duration: 20s;
+}
+
+.bokeh-orb:nth-child(4) {
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(26, 51, 40, 0.1), transparent 70%);
+  top: 30%;
+  left: 60%;
+  animation-delay: 9s;
+  animation-duration: 14s;
+}
+
+@keyframes bokehFloat {
+  0%, 100% { opacity: 0; transform: translate(0, 0) scale(1); }
+  25% { opacity: 1; }
+  50% { opacity: 0.7; transform: translate(30px, -20px) scale(1.1); }
+  75% { opacity: 1; }
+}
+
+/* --- Typography --- */
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+}
+
+h1 { font-size: 3.5rem; line-height: 1.1; }
+h2 { font-size: 2.2rem; line-height: 1.2; }
+h3 { font-size: 1.6rem; line-height: 1.3; }
+
+a {
+  color: var(--champagne);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--champagne-light);
+}
+
+/* --- Gold Ornamental Divider --- */
+.gold-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 2rem auto;
+  max-width: 400px;
+}
+
+.gold-divider::before,
+.gold-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--champagne), transparent);
+}
+
+.gold-divider .ornament {
+  color: var(--champagne);
+  font-size: 1.2rem;
+  opacity: 0.7;
+}
+
+/* --- Container --- */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Buttons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: var(--gold-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--champagne);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  background: var(--champagne-glow);
+  border-color: var(--champagne);
+  color: var(--champagne-light);
+  box-shadow: 0 0 20px rgba(201, 165, 90, 0.1);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--champagne), var(--champagne-light));
+  color: var(--obsidian);
+  border-color: var(--champagne);
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--champagne-light), #f0d890);
+  color: var(--obsidian);
+  box-shadow: 0 4px 24px rgba(201, 165, 90, 0.3);
+}
+
+/* --- Cards --- */
+.card {
+  background: var(--card-bg);
+  border: var(--gold-border);
+  border-radius: 8px;
+  padding: 28px;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(10px);
+}
+
+.card:hover {
+  background: var(--card-hover);
+  border-color: rgba(201, 165, 90, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(201, 165, 90, 0.05);
+}
+
+/* --- Footer --- */
+.site-footer {
+  margin-top: 80px;
+  padding: 40px 0 30px;
+  border-top: var(--gold-border);
+  text-align: center;
+}
+
+.footer-stats {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 32px;
+  margin-bottom: 24px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.footer-stats span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-quote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  margin-top: 16px;
+}
+
+.footer-quote .attribution {
+  font-style: normal;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* --- Nav Cards Grid (index.html) --- */
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin: 40px 0;
+}
+
+.nav-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 28px;
+  background: var(--card-bg);
+  border: var(--gold-border);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(10px);
+}
+
+.nav-card:hover {
+  background: var(--card-hover);
+  border-color: rgba(201, 165, 90, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(201, 165, 90, 0.08);
+}
+
+.nav-card .icon {
+  font-size: 2rem;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201, 165, 90, 0.08);
+  border: 1px solid rgba(201, 165, 90, 0.15);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.nav-card .label h3 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.nav-card .label p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+/* --- Hero (index.html) --- */
+.hero {
+  text-align: center;
+  padding: 100px 0 60px;
+  position: relative;
+}
+
+.hero-mountain {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 900px;
+  opacity: 0.12;
+  z-index: 0;
+}
+
+.hero-mountain svg {
+  width: 100%;
+  height: auto;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero h1 {
+  font-size: 4rem;
+  font-weight: 300;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+}
+
+.hero .year {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--champagne);
+  letter-spacing: 0.3em;
+  font-weight: 300;
+  margin-bottom: 12px;
+}
+
+.hero .location {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* --- Championship Banner --- */
+.champ-banner {
+  background: linear-gradient(135deg, var(--emerald), #0d1f16);
+  border: 1px solid rgba(42, 90, 66, 0.4);
+  border-radius: 12px;
+  padding: 36px;
+  text-align: center;
+  margin: 40px auto;
+  max-width: 700px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(26, 51, 40, 0.3);
+}
+
+.champ-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(201, 165, 90, 0.05), transparent 60%);
+  animation: champGlow 4s ease-in-out infinite;
+}
+
+@keyframes champGlow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.champ-banner .trophy {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 15px rgba(201, 165, 90, 0.4));
+  position: relative;
+  z-index: 1;
+}
+
+.champ-banner h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--champagne-light);
+  margin-bottom: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.champ-banner .league-year {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--champagne);
+  opacity: 0.8;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.champ-banner .note {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Watermark Icons --- */
+.watermarks {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  padding: 40px 0;
+  opacity: 0.08;
+  font-size: 2.5rem;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--obsidian);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 165, 90, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 165, 90, 0.4);
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  h1 { font-size: 2.5rem; }
+  .hero h1 { font-size: 2.8rem; }
+  .hero .year { font-size: 1.3rem; }
+  .nav-grid { grid-template-columns: 1fr; }
+  .footer-stats { gap: 16px; font-size: 0.65rem; }
+  .container { padding: 0 16px; }
+  .champ-banner { padding: 24px; margin: 24px auto; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 2.2rem; }
+  .nav-card { padding: 18px 20px; }
+  .watermarks { gap: 24px; font-size: 1.8rem; }
+}

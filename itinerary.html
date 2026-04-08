@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Itinerary — Myles's Bachelor Party</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/inner.css">
+</head>
+<body>
+
+  <div class="bokeh-container">
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+  </div>
+
+  <div class="container">
+
+    <header class="inner-header">
+      <a href="index.html" class="back-link">← Back to Hub</a>
+      <h1>Itinerary</h1>
+      <p class="subtitle" id="headerSubtitle">Loading schedule...</p>
+      <div style="margin-top:16px; display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
+        <div class="status-bar" id="sourceStatus">
+          <span class="status-dot" id="sourceDot"></span>
+          <span id="sourceText">Loading...</span>
+        </div>
+        <button class="refresh-btn" onclick="loadItinerary()">↻ Refresh</button>
+      </div>
+    </header>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <!-- Info Cards: Rules & Packing -->
+    <div class="info-cards" id="infoCards"></div>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <!-- Timeline -->
+    <div id="itineraryContent"></div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-stats">
+        <span>1 Groom to Send Off</span><span>·</span>
+        <span>∞ Memories Made</span><span>·</span>
+        <span>Tahoe</span>
+      </div>
+      <div class="footer-quote">
+        "I'll fight with everything I have!"<br>
+        <span class="attribution">— Roy · Super Smash Bros. Melee</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="config/sheet.js"></script>
+  <script>
+    const categoryMap = {
+      gaming: 'cat-gaming',
+      food: 'cat-food',
+      outdoor: 'cat-outdoor',
+      social: 'cat-social',
+      logistics: 'cat-logistics'
+    };
+
+    function renderInfoCards() {
+      const container = document.getElementById('infoCards');
+      let html = '';
+
+      if (SHEET_CONFIG.rules && SHEET_CONFIG.rules.length) {
+        html += `<div class="info-card"><h3>House Rules</h3><ul>`;
+        SHEET_CONFIG.rules.forEach(r => { html += `<li>${r}</li>`; });
+        html += `</ul></div>`;
+      }
+
+      if (SHEET_CONFIG.packing && SHEET_CONFIG.packing.length) {
+        html += `<div class="info-card"><h3>Packing List</h3><ul>`;
+        SHEET_CONFIG.packing.forEach(p => { html += `<li>${p}</li>`; });
+        html += `</ul></div>`;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function renderItinerary(data) {
+      const container = document.getElementById('itineraryContent');
+      let html = '';
+
+      data.days.forEach(day => {
+        html += `
+          <section class="itinerary-section">
+            <h2 class="day-header">${day.day}</h2>
+            <p class="day-date">${day.date}</p>
+            <div class="timeline">
+        `;
+
+        day.events.forEach(event => {
+          const catClass = categoryMap[event.category] || '';
+          html += `
+            <div class="timeline-item ${catClass}">
+              <div class="time">${event.time}</div>
+              <div class="event-title">${event.title}</div>
+              <div class="event-details">${event.details}</div>
+            </div>
+          `;
+        });
+
+        html += `</div></section>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function parseCSV(csv) {
+      const lines = csv.trim().split('\n');
+      if (lines.length < 2) return null;
+
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
+      const days = {};
+
+      for (let i = 1; i < lines.length; i++) {
+        // Handle CSV with quoted fields
+        const row = [];
+        let current = '';
+        let inQuotes = false;
+        for (const char of lines[i]) {
+          if (char === '"') { inQuotes = !inQuotes; continue; }
+          if (char === ',' && !inQuotes) { row.push(current.trim()); current = ''; continue; }
+          current += char;
+        }
+        row.push(current.trim());
+
+        const obj = {};
+        headers.forEach((h, idx) => { obj[h] = row[idx] || ''; });
+
+        const dayKey = obj.day || obj.date || 'Unknown';
+        if (!days[dayKey]) {
+          days[dayKey] = { day: dayKey, date: obj.date || dayKey, events: [] };
+        }
+
+        days[dayKey].events.push({
+          time: obj.time || '',
+          title: obj.title || obj.event || '',
+          details: obj.details || obj.description || obj.notes || '',
+          category: obj.category || 'logistics'
+        });
+      }
+
+      return { days: Object.values(days) };
+    }
+
+    async function loadItinerary() {
+      const dot = document.getElementById('sourceDot');
+      const text = document.getElementById('sourceText');
+      const subtitle = document.getElementById('headerSubtitle');
+
+      subtitle.textContent = `${SHEET_CONFIG.title} · ${SHEET_CONFIG.dates}`;
+
+      // Try Google Sheets CSV
+      if (SHEET_CONFIG.csvUrl && SHEET_CONFIG.csvUrl !== 'YOUR_PUBLISHED_CSV_URL_HERE') {
+        try {
+          text.textContent = 'Fetching from Google Sheets...';
+          const resp = await fetch(SHEET_CONFIG.csvUrl);
+          const csv = await resp.text();
+          const data = parseCSV(csv);
+
+          if (data && data.days.length > 0) {
+            dot.classList.remove('offline', 'fallback');
+            text.textContent = 'LIVE — GOOGLE SHEETS';
+            renderItinerary(data);
+            renderInfoCards();
+            return;
+          }
+        } catch (e) {
+          console.error('Sheet fetch failed:', e);
+        }
+      }
+
+      // Fallback to JSON
+      try {
+        dot.classList.remove('offline');
+        dot.classList.add('fallback');
+        text.textContent = 'FALLBACK — LOCAL JSON';
+
+        const resp = await fetch('itinerary.json');
+        const data = await resp.json();
+        renderItinerary(data);
+        renderInfoCards();
+      } catch (e) {
+        dot.classList.add('offline');
+        text.textContent = 'ERROR — NO DATA';
+        console.error('JSON fallback failed:', e);
+      }
+    }
+
+    loadItinerary();
+  </script>
+
+  <script src="js/shared.js"></script>
+</body>
+</html>
