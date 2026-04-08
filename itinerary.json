@@ -1,157 +1,157 @@
 {
   "days": [
     {
-      "day": "Friday",
+      "day": "Day 1 — Friday",
       "date": "April 17, 2026",
       "events": [
         {
           "time": "4:00 PM",
           "title": "Check-In",
-          "details": "996 Skyland Dr, Zephyr Cove, NV 89448",
+          "details": "996 Skyland Dr, Zephyr Cove, NV 89448. Get settled, claim your bed, take in the lake.",
           "category": "logistics"
         },
         {
           "time": "4:30 PM",
           "title": "Quick Supply Run",
-          "details": "Stock up on essentials for the weekend",
+          "details": "Grab drinks, breakfast food for the weekend, and any essentials. Keep it fast — big night ahead.",
           "category": "logistics"
         },
         {
           "time": "5:30 PM",
           "title": "Get Dressed",
-          "details": "Business casual required for dinner",
+          "details": "Business casual to semi-formal tonight. The Edge requires it. Look sharp.",
           "category": "logistics"
         },
         {
           "time": "6:00 PM",
           "title": "Depart for Edgewood",
-          "details": "Valet only — whole party must be present to be seated",
+          "details": "Allow extra time — valet parking only at Edgewood. The entire party must be present to be seated.",
           "category": "logistics"
         },
         {
           "time": "6:30 PM",
-          "title": "Pre-Dinner Drinks at The Edge Lounge",
-          "details": "Lakefront fire pit, handcrafted cocktails",
+          "title": "Pre-Dinner Drinks — The Edge Lounge",
+          "details": "Arrive early and gather at the lounge. Lakefront fire pit, handcrafted cocktails, and views straight across the water.",
           "category": "social"
         },
         {
           "time": "7:00 PM",
-          "title": "Dinner at The Edge, Edgewood Tahoe",
-          "details": "Farm-to-table contemporary American. Cashless — credit card only. 20% gratuity auto-added for 6+",
+          "title": "Dinner at The Edge — Edgewood Tahoe",
+          "details": "Farm-to-table contemporary American. Lakefront views, vaulted ceilings, glowing fire pit. The send-off dinner. Cashless — credit card only. 20% gratuity added for parties of 6+.",
           "category": "food"
         },
         {
           "time": "9:30 PM",
           "title": "Back to Base",
-          "details": "Return to the house",
-          "category": "logistics"
+          "details": "Return to the house. Night is young.",
+          "category": "social"
         },
         {
           "time": "10:00 PM",
           "title": "Lakeside Bonfire",
-          "details": "End the night around the fire",
+          "details": "Drinks, fire, stories, and the appropriate roasting of the groom.",
           "category": "social"
         }
       ]
     },
     {
-      "day": "Saturday",
+      "day": "Day 2 — Saturday",
       "date": "April 18, 2026",
       "events": [
         {
           "time": "9:00 AM",
           "title": "Breakfast at the House",
-          "details": "Fuel up for the big day",
+          "details": "Cook together. Eggs, coffee, the works. High of 52°F today — good day ahead.",
           "category": "food"
         },
         {
           "time": "10:30 AM",
           "title": "Lake Time",
-          "details": "Walk the shore, dock session — bring layers",
+          "details": "Walk the shore, dock session, take in Zephyr Cove. Bring layers — crisp but gorgeous.",
           "category": "outdoor"
         },
         {
           "time": "12:30 PM",
           "title": "Lunch",
-          "details": "Midday refuel",
+          "details": "Back at the house. Fuel up for the afternoon.",
           "category": "food"
         },
         {
           "time": "2:00 PM",
           "title": "Halo 3 LAN Party",
-          "details": "Multi-TV setup — everyone in bracket or free-for-all",
+          "details": "Multi-TV setup, everyone in. The main event. Bracket style or free-for-all — sort it out on the day.",
           "category": "gaming"
         },
         {
           "time": "4:00 PM",
           "title": "Open Gaming & Cards",
-          "details": "Smash, MTG, pool — jump in and out as you please",
-          "category": "gaming"
+          "details": "Smash, MTG, pool, whatever. Jump in and out as you please.",
+          "category": "social"
         },
         {
           "time": "6:00 PM",
           "title": "Hang & Drinks",
-          "details": "Good time to get outside if weather holds",
+          "details": "Wind down before dinner. Good time to get outside if the weather holds.",
           "category": "social"
         },
         {
           "time": "8:00 PM",
           "title": "Grill Night",
-          "details": "Fire up the grill — cold outside, warm inside",
+          "details": "Fire up the grill. Saturday dinner at the house. Cold outside, warm inside.",
           "category": "food"
         },
         {
           "time": "9:30 PM",
           "title": "Championship Finals",
-          "details": "Wrap up open tournaments, crown the winners",
+          "details": "Wrap up any open tournaments. Crown the winners. Update the leaderboard.",
           "category": "gaming"
         },
         {
           "time": "Late",
           "title": "Send-Off",
-          "details": "Last night together — make it count",
+          "details": "Last night together. Make it count.",
           "category": "social"
         }
       ]
     },
     {
-      "day": "Sunday",
+      "day": "Day 3 — Sunday",
       "date": "April 19, 2026",
       "events": [
         {
           "time": "8:00 AM",
           "title": "Breakfast & Clean Up",
-          "details": "Check-out firm at 10 AM",
-          "category": "logistics"
+          "details": "Final breakfast together. Clean the house. Check-out is firm at 10:00 AM.",
+          "category": "food"
         },
         {
           "time": "9:00 AM",
           "title": "Morning Walk (Optional)",
-          "details": "One last look at the lake — high of 45°F, bring a jacket",
+          "details": "One last look at the lake. High of 45°F — bring a jacket.",
           "category": "outdoor"
         },
         {
           "time": "10:00 AM",
           "title": "Check-Out",
-          "details": "Keys returned by 10 AM sharp — load the cars",
+          "details": "Keys returned by 10:00 AM sharp. Load the cars.",
           "category": "logistics"
         },
         {
           "time": "10:00 AM",
           "title": "Drive to Roseville",
-          "details": "1.5–2 hrs via Hwy 50 West — Topgolf right on the way home",
+          "details": "~1.5–2 hrs via Hwy 50 west. Topgolf is right on the way home — barely a detour.",
           "category": "logistics"
         },
         {
           "time": "12:00 PM",
-          "title": "Topgolf Roseville",
-          "details": "1700 Freedom Way, Roseville, CA. Book 2 side-by-side bays in advance — $37/hr per bay, noon–5 PM, up to 6 players per bay, clubs provided",
-          "category": "social"
+          "title": "Topgolf — Roseville",
+          "details": "1700 Freedom Way, Roseville, CA. Book 2 side-by-side bays in advance. $37/hr per bay noon–5pm, up to 6 players per bay. Clubs provided.",
+          "category": "gaming"
         },
         {
           "time": "2:00 PM",
           "title": "Head Home",
-          "details": "Final send-off — see you at the wedding",
+          "details": "Final send-off. See you at the wedding.",
           "category": "logistics"
         }
       ]
