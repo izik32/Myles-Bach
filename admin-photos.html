@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Admin — MBP 2026</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/inner.css">
+  <style>
+    .admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin: 30px 0;
+    }
+
+    .admin-tile {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      border: var(--gold-border);
+      background: var(--card-bg);
+    }
+
+    .admin-tile img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      display: block;
+    }
+
+    .admin-tile-info {
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .admin-tile-name {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .delete-btn {
+      padding: 5px 12px;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: var(--font-body);
+      border: 1px solid rgba(122, 32, 32, 0.4);
+      background: transparent;
+      color: var(--crimson-bright);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+
+    .delete-btn:hover {
+      background: rgba(122, 32, 32, 0.3);
+      border-color: var(--crimson-bright);
+    }
+
+    .delete-btn.confirming {
+      background: var(--crimson);
+      color: var(--text-primary);
+      border-color: var(--crimson-bright);
+    }
+
+    .admin-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bokeh-container">
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+  </div>
+
+  <div class="container">
+
+    <header class="inner-header">
+      <a href="index.html" class="back-link">← Back to Hub</a>
+      <h1>Photo Admin</h1>
+      <p class="subtitle">Manage Uploaded Photos</p>
+      <div class="status-bar" id="firebaseStatus">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Connecting...</span>
+      </div>
+    </header>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <p class="admin-count" id="photoCount"></p>
+    <div class="admin-grid" id="adminGrid"></div>
+
+    <footer class="site-footer">
+      <div class="footer-quote">
+        "I'll fight with everything I have!"<br>
+        <span class="attribution">— Roy · Super Smash Bros. Melee</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+    import { getStorage, ref as storageRef, deleteObject } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js';
+    import { getFirestore, collection, getDocs, deleteDoc, doc, orderBy, query } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBFxIU0P2v1nFFBVdvTAqjh86-duehVfdI",
+      authDomain: "bach-party-photos.firebaseapp.com",
+      projectId: "bach-party-photos",
+      storageBucket: "bach-party-photos.firebasestorage.app",
+      messagingSenderId: "818312719919",
+      appId: "1:818312719919:web:c988eb056286e2b01be0da"
+    };
+
+    let storage, db;
+    let firebaseReady = false;
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      storage = getStorage(app);
+      db = getFirestore(app);
+      firebaseReady = true;
+      document.getElementById('statusDot').classList.remove('offline');
+      document.getElementById('statusText').textContent = 'Firebase Connected';
+    } catch (e) {
+      document.getElementById('statusDot').classList.add('offline');
+      document.getElementById('statusText').textContent = 'Firebase Offline';
+    }
+
+    async function loadPhotos() {
+      const grid = document.getElementById('adminGrid');
+      const countEl = document.getElementById('photoCount');
+      grid.innerHTML = '';
+      let photos = [];
+
+      // Firebase photos
+      if (firebaseReady) {
+        try {
+          const q = query(collection(db, 'photos'), orderBy('timestamp', 'desc'));
+          const snap = await getDocs(q);
+          snap.forEach(d => photos.push({ id: d.id, source: 'firebase', ...d.data() }));
+        } catch (e) {
+          console.error('Failed to load Firebase photos:', e);
+        }
+      }
+
+      // Local photos
+      const local = JSON.parse(localStorage.getItem('mbp_photos') || '[]');
+      local.forEach((p, i) => photos.push({ id: String(i), source: 'local', ...p }));
+
+      countEl.textContent = `${photos.length} photo${photos.length !== 1 ? 's' : ''}`;
+
+      if (photos.length === 0) {
+        grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px;grid-column:1/-1;">No photos uploaded yet</p>';
+        return;
+      }
+
+      photos.forEach(photo => {
+        const tile = document.createElement('div');
+        tile.className = 'admin-tile';
+        tile.innerHTML = `
+          <img src="${photo.url}" alt="${photo.name || 'Photo'}" loading="lazy">
+          <div class="admin-tile-info">
+            <span class="admin-tile-name">${photo.name || 'Untitled'}</span>
+            <button class="delete-btn" data-id="${photo.id}" data-source="${photo.source}" data-url="${photo.url}">Delete</button>
+          </div>
+        `;
+        grid.appendChild(tile);
+      });
+
+      // Delete handlers with confirm
+      grid.querySelectorAll('.delete-btn').forEach(btn => {
+        let confirmTimeout = null;
+        btn.addEventListener('click', async () => {
+          if (!btn.classList.contains('confirming')) {
+            btn.classList.add('confirming');
+            btn.textContent = 'Confirm?';
+            confirmTimeout = setTimeout(() => {
+              btn.classList.remove('confirming');
+              btn.textContent = 'Delete';
+            }, 3000);
+            return;
+          }
+
+          clearTimeout(confirmTimeout);
+          btn.textContent = '...';
+          btn.disabled = true;
+
+          const source = btn.dataset.source;
+          const id = btn.dataset.id;
+          const url = btn.dataset.url;
+
+          try {
+            if (source === 'firebase' && firebaseReady) {
+              // Delete Firestore doc
+              await deleteDoc(doc(db, 'photos', id));
+
+              // Try to delete from Storage
+              try {
+                const path = decodeURIComponent(url.split('/o/')[1]?.split('?')[0] || '');
+                if (path) {
+                  await deleteObject(storageRef(storage, path));
+                }
+              } catch (e) {
+                console.warn('Storage delete failed (may already be removed):', e);
+              }
+            } else if (source === 'local') {
+              let local = JSON.parse(localStorage.getItem('mbp_photos') || '[]');
+              local.splice(parseInt(id), 1);
+              localStorage.setItem('mbp_photos', JSON.stringify(local));
+            }
+
+            btn.closest('.admin-tile').remove();
+            const remaining = document.querySelectorAll('.admin-tile').length;
+            countEl.textContent = `${remaining} photo${remaining !== 1 ? 's' : ''}`;
+          } catch (e) {
+            console.error('Delete failed:', e);
+            btn.textContent = 'Error';
+            btn.disabled = false;
+          }
+        });
+      });
+    }
+
+    loadPhotos();
+  </script>
+
+  <script src="js/shared.js"></script>
+</body>
+</html>
