@@ -13,41 +13,29 @@
         {
           "time": "4:30 PM",
           "title": "Quick Supply Run",
-          "details": "Grab drinks, breakfast food for the weekend, and any essentials. Keep it fast — big night ahead.",
-          "category": "logistics"
-        },
-        {
-          "time": "5:30 PM",
-          "title": "Get Dressed",
-          "details": "Business casual to semi-formal tonight. The Edge requires it. Look sharp.",
+          "details": "Grab drinks, food for dinner tonight, and any essentials for the weekend.",
           "category": "logistics"
         },
         {
           "time": "6:00 PM",
-          "title": "Depart for Edgewood",
-          "details": "Allow extra time — valet parking only at Edgewood. The entire party must be present to be seated.",
-          "category": "logistics"
-        },
-        {
-          "time": "6:30 PM",
-          "title": "Pre-Dinner Drinks — The Edge Lounge",
-          "details": "Arrive early and gather at the lounge. Lakefront fire pit, handcrafted cocktails, and views straight across the water.",
-          "category": "social"
-        },
-        {
-          "time": "7:00 PM",
-          "title": "Dinner at The Edge — Edgewood Tahoe",
-          "details": "Farm-to-table contemporary American. Lakefront views, vaulted ceilings, glowing fire pit. The send-off dinner. Cashless — credit card only. 20% gratuity added for parties of 6+.",
+          "title": "Dinner at the House",
+          "details": "Cook together. First night, get settled in. Casual.",
           "category": "food"
         },
         {
-          "time": "9:30 PM",
-          "title": "Back to Base",
-          "details": "Return to the house. Night is young.",
+          "time": "7:30 PM",
+          "title": "Cigars on the Deck",
+          "details": "Light them up. Lake views. This is what it's about.",
           "category": "social"
         },
         {
-          "time": "10:00 PM",
+          "time": "9:00 PM",
+          "title": "Cards / Poker / Hang",
+          "details": "Poker, Magic draft, whatever gets going. No schedule — just vibes.",
+          "category": "social"
+        },
+        {
+          "time": "Late",
           "title": "Lakeside Bonfire",
           "details": "Drinks, fire, stories, and the appropriate roasting of the groom.",
           "category": "social"
@@ -61,7 +49,7 @@
         {
           "time": "9:00 AM",
           "title": "Breakfast at the House",
-          "details": "Cook together. Eggs, coffee, the works. High of 52°F today — good day ahead.",
+          "details": "Cook together. Eggs, coffee, the works.",
           "category": "food"
         },
         {
@@ -73,38 +61,56 @@
         {
           "time": "12:30 PM",
           "title": "Lunch",
-          "details": "Back at the house. Fuel up for the afternoon.",
+          "details": "Back at the house. Fuel up.",
           "category": "food"
         },
         {
           "time": "2:00 PM",
           "title": "Halo 3 LAN Party",
-          "details": "Multi-TV setup, everyone in. The main event. Bracket style or free-for-all — sort it out on the day.",
+          "details": "Multi-TV setup, everyone in. The main event. Bracket or free-for-all — sort it out on the day.",
           "category": "gaming"
         },
         {
-          "time": "4:00 PM",
-          "title": "Open Gaming & Cards",
-          "details": "Smash, MTG, pool, whatever. Jump in and out as you please.",
+          "time": "3:30 PM",
+          "title": "Get Ready",
+          "details": "Clean up and look sharp. Dinner at Edgewood tonight.",
+          "category": "logistics"
+        },
+        {
+          "time": "4:30 PM",
+          "title": "Depart for Edgewood",
+          "details": "Allow extra time — valet parking only. Entire party must be present to be seated.",
+          "category": "logistics"
+        },
+        {
+          "time": "5:00 PM",
+          "title": "Pre-Dinner Drinks — The Edge Lounge",
+          "details": "Gather at the lounge before dinner. Lakefront fire pit, handcrafted cocktails, views across the water.",
           "category": "social"
         },
         {
-          "time": "6:00 PM",
-          "title": "Hang & Drinks",
-          "details": "Wind down before dinner. Good time to get outside if the weather holds.",
-          "category": "social"
-        },
-        {
-          "time": "8:00 PM",
-          "title": "Grill Night",
-          "details": "Fire up the grill. Saturday dinner at the house. Cold outside, warm inside.",
+          "time": "5:30 PM",
+          "title": "Dinner at The Bistro — Edgewood Tahoe",
+          "details": "Tahoe-inspired cuisine, lakefront views, mountain-chic atmosphere. Cashless — credit card only. 180 Lake Pkwy, Stateline, NV.",
           "category": "food"
         },
         {
+          "time": "8:00 PM",
+          "title": "Back to Base",
+          "details": "Return to the house.",
+          "category": "social"
+        },
+        {
+          "time": "8:30 PM",
+          "title": "Cigars / Hang on the Deck",
+          "details": "Last night — make it a good one.",
+          "category": "social"
+        },
+        {
           "time": "9:30 PM",
-          "title": "Championship Finals",
-          "details": "Wrap up any open tournaments. Crown the winners. Update the leaderboard.",
-          "category": "gaming"
+          "title": "Games / Poker / Video Games",
+          "details": "Open floor — Magic, poker, Smash, whatever. Jump in and out.",
+          "category": "social"
         },
         {
           "time": "Late",
@@ -125,12 +131,6 @@
           "category": "food"
         },
         {
-          "time": "9:00 AM",
-          "title": "Morning Walk (Optional)",
-          "details": "One last look at the lake. High of 45°F — bring a jacket.",
-          "category": "outdoor"
-        },
-        {
           "time": "10:00 AM",
           "title": "Check-Out",
           "details": "Keys returned by 10:00 AM sharp. Load the cars.",
@@ -139,7 +139,7 @@
         {
           "time": "10:00 AM",
           "title": "Drive to Roseville",
-          "details": "~1.5–2 hrs via Hwy 50 west. Topgolf is right on the way home — barely a detour.",
+          "details": "~1.5–2 hrs via Hwy 50 west. Topgolf is right on the way home.",
           "category": "logistics"
         },
         {
