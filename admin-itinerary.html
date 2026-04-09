@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Itinerary Admin — MBP 2026</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/inner.css">
+  <style>
+    .editor-wrap {
+      margin: 24px 0;
+    }
+
+    .editor-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    #jsonEditor {
+      width: 100%;
+      min-height: 480px;
+      background: var(--card-bg);
+      border: var(--gold-border);
+      color: var(--text-primary);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      padding: 16px;
+      box-sizing: border-box;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #jsonEditor:focus {
+      border-color: var(--gold);
+    }
+
+    #jsonEditor.error {
+      border-color: var(--crimson-bright);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      align-items: center;
+    }
+
+    .validate-msg {
+      font-size: 0.75rem;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .validate-msg.ok   { color: #6dbf8a; }
+    .validate-msg.err  { color: var(--crimson-bright); }
+
+    .preview-section {
+      margin-top: 36px;
+    }
+
+    .preview-day {
+      margin-bottom: 28px;
+    }
+
+    .preview-day h3 {
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .preview-event {
+      display: flex;
+      gap: 14px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+    }
+
+    .preview-event-time {
+      color: var(--text-muted);
+      min-width: 70px;
+      flex-shrink: 0;
+    }
+
+    .preview-event-title {
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bokeh-container">
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+  </div>
+
+  <div class="container">
+
+    <header class="inner-header">
+      <a href="index.html" class="back-link">← Back to Hub</a>
+      <h1>Itinerary Admin</h1>
+      <p class="subtitle">Edit &amp; Publish the Live Schedule</p>
+      <div class="status-bar" id="firebaseStatus">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Connecting...</span>
+      </div>
+    </header>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <div class="editor-wrap">
+      <span class="editor-label">Itinerary JSON — Edit directly or paste a new schedule</span>
+      <textarea id="jsonEditor" spellcheck="false"></textarea>
+
+      <div class="action-row">
+        <button class="btn-primary" id="validateBtn">Validate JSON</button>
+        <button class="btn-primary" id="saveBtn" disabled>Save &amp; Publish</button>
+        <button class="btn-outline" id="reloadBtn">↻ Reload from Firebase</button>
+        <span class="validate-msg" id="validateMsg"></span>
+      </div>
+    </div>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <div class="preview-section" id="preview"></div>
+
+    <footer class="site-footer">
+      <div class="footer-quote">
+        "I'll fight with everything I have!"<br>
+        <span class="attribution">— Roy · Super Smash Bros. Melee</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script type="module">
+    import { initializeApp }          from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp }
+                                      from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyBFxIU0P2v1nFFBVdvTAqjh86-duehVfdI",
+      authDomain:        "bach-party-photos.firebaseapp.com",
+      projectId:         "bach-party-photos",
+      storageBucket:     "bach-party-photos.firebasestorage.app",
+      messagingSenderId: "818312719919",
+      appId:             "1:818312719919:web:c988eb056286e2b01be0da"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    const statusDot  = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const editor     = document.getElementById('jsonEditor');
+    const validateBtn = document.getElementById('validateBtn');
+    const saveBtn    = document.getElementById('saveBtn');
+    const reloadBtn  = document.getElementById('reloadBtn');
+    const validateMsg = document.getElementById('validateMsg');
+    const preview    = document.getElementById('preview');
+
+    const ITINERARY_REF = doc(db, 'config', 'itinerary');
+
+    // ── Load ──────────────────────────────────────────────────────────────────
+    async function loadFromFirebase() {
+      statusText.textContent = 'Loading from Firebase...';
+      try {
+        const snap = await getDoc(ITINERARY_REF);
+        if (snap.exists()) {
+          editor.value = JSON.stringify(snap.data().itinerary, null, 2);
+          statusDot.classList.remove('offline', 'fallback');
+          statusText.textContent = 'Loaded from Firebase';
+          renderPreview(snap.data().itinerary);
+          return;
+        }
+      } catch (e) {
+        console.warn('Firebase read failed:', e);
+      }
+
+      // Fall back to itinerary.json
+      try {
+        const resp = await fetch('itinerary.json?_=' + Date.now());
+        const data = await resp.json();
+        editor.value = JSON.stringify(data, null, 2);
+        statusDot.classList.add('fallback');
+        statusText.textContent = 'Loaded from itinerary.json (no Firebase override yet)';
+        renderPreview(data);
+      } catch (e) {
+        statusDot.classList.add('offline');
+        statusText.textContent = 'Failed to load itinerary';
+      }
+    }
+
+    // ── Validate ──────────────────────────────────────────────────────────────
+    function validate() {
+      validateMsg.className = 'validate-msg';
+      editor.classList.remove('error');
+      saveBtn.disabled = true;
+
+      try {
+        const data = JSON.parse(editor.value);
+        if (!data.days || !Array.isArray(data.days)) throw new Error('Missing "days" array at root');
+        const totalEvents = data.days.reduce((n, d) => n + (d.events?.length || 0), 0);
+        validateMsg.textContent = `✓ Valid — ${data.days.length} day(s), ${totalEvents} event(s)`;
+        validateMsg.classList.add('ok');
+        saveBtn.disabled = false;
+        renderPreview(data);
+        return data;
+      } catch (e) {
+        editor.classList.add('error');
+        validateMsg.textContent = '✗ ' + e.message;
+        validateMsg.classList.add('err');
+        return null;
+      }
+    }
+
+    // ── Save ──────────────────────────────────────────────────────────────────
+    async function save() {
+      const data = validate();
+      if (!data) return;
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+      statusText.textContent = 'Publishing to Firebase...';
+
+      try {
+        await setDoc(ITINERARY_REF, { itinerary: data, updatedAt: serverTimestamp() });
+        statusDot.classList.remove('offline', 'fallback');
+        statusText.textContent = 'Published — live site will update immediately';
+        validateMsg.textContent = '✓ Saved to Firebase';
+        validateMsg.className = 'validate-msg ok';
+      } catch (e) {
+        statusDot.classList.add('offline');
+        statusText.textContent = 'Save failed — check Firestore rules';
+        validateMsg.textContent = '✗ Firebase write error: ' + e.message;
+        validateMsg.className = 'validate-msg err';
+        console.error(e);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save & Publish';
+      }
+    }
+
+    // ── Preview ───────────────────────────────────────────────────────────────
+    function renderPreview(data) {
+      if (!data?.days?.length) { preview.innerHTML = ''; return; }
+      preview.innerHTML = data.days.map(day => `
+        <div class="preview-day">
+          <h3>${day.day} <span style="color:var(--text-muted);font-weight:300;">· ${day.date}</span></h3>
+          ${(day.events || []).map(e => `
+            <div class="preview-event">
+              <span class="preview-event-time">${e.time}</span>
+              <span class="preview-event-title">${e.title}</span>
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+    }
+
+    validateBtn.addEventListener('click', validate);
+    saveBtn.addEventListener('click', save);
+    reloadBtn.addEventListener('click', loadFromFirebase);
+
+    loadFromFirebase();
+  </script>
+
+  <script src="js/shared.js"></script>
+</body>
+</html>

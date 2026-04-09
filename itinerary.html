@@ -161,6 +161,23 @@
 
       const bust = `?_=${Date.now()}`;
 
+      // Try Firebase (highest priority — updated via admin-itinerary.html)
+      if (window.__getFirestoreItinerary) {
+        try {
+          text.textContent = 'Fetching from Firebase...';
+          const data = await window.__getFirestoreItinerary();
+          if (data && data.days && data.days.length > 0) {
+            dot.classList.remove('offline', 'fallback');
+            text.textContent = 'LIVE — FIREBASE';
+            renderItinerary(data);
+            renderInfoCards();
+            return;
+          }
+        } catch (e) {
+          console.warn('Firebase fetch failed:', e);
+        }
+      }
+
       // Try Google Sheets CSV
       if (SHEET_CONFIG.csvUrl && SHEET_CONFIG.csvUrl !== 'YOUR_PUBLISHED_CSV_URL_HERE') {
         try {
@@ -200,9 +217,36 @@
       }
     }
 
-    loadItinerary();
   </script>
 
   <script src="js/shared.js"></script>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyBFxIU0P2v1nFFBVdvTAqjh86-duehVfdI",
+      authDomain:        "bach-party-photos.firebaseapp.com",
+      projectId:         "bach-party-photos",
+      storageBucket:     "bach-party-photos.firebasestorage.app",
+      messagingSenderId: "818312719919",
+      appId:             "1:818312719919:web:c988eb056286e2b01be0da"
+    };
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      const db  = getFirestore(app);
+      window.__getFirestoreItinerary = async () => {
+        const snap = await getDoc(doc(db, 'config', 'itinerary'));
+        return snap.exists() ? snap.data().itinerary : null;
+      };
+    } catch (e) {
+      console.warn('Firebase init failed:', e);
+    }
+
+    // Call after Firebase is ready (modules run after inline scripts)
+    window.loadItinerary();
+  </script>
 </body>
 </html>
