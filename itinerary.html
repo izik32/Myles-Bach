@@ -165,7 +165,8 @@
       if (SHEET_CONFIG.csvUrl && SHEET_CONFIG.csvUrl !== 'YOUR_PUBLISHED_CSV_URL_HERE') {
         try {
           text.textContent = 'Fetching from Google Sheets...';
-          const resp = await fetch(SHEET_CONFIG.csvUrl + bust);
+          const resp = await fetch(SHEET_CONFIG.csvUrl + bust, { cache: 'no-store' });
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
           const csv = await resp.text();
           const data = parseCSV(csv);
 
@@ -187,7 +188,8 @@
         dot.classList.add('fallback');
         text.textContent = 'FALLBACK — LOCAL JSON';
 
-        const resp = await fetch('itinerary.json' + bust);
+        const resp = await fetch('itinerary.json' + bust, { cache: 'no-store' });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
         renderItinerary(data);
         renderInfoCards();
