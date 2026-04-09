@@ -159,11 +159,13 @@
 
       subtitle.textContent = `${SHEET_CONFIG.title} · ${SHEET_CONFIG.dates}`;
 
+      const bust = `?_=${Date.now()}`;
+
       // Try Google Sheets CSV
       if (SHEET_CONFIG.csvUrl && SHEET_CONFIG.csvUrl !== 'YOUR_PUBLISHED_CSV_URL_HERE') {
         try {
           text.textContent = 'Fetching from Google Sheets...';
-          const resp = await fetch(SHEET_CONFIG.csvUrl);
+          const resp = await fetch(SHEET_CONFIG.csvUrl + bust);
           const csv = await resp.text();
           const data = parseCSV(csv);
 
@@ -185,7 +187,7 @@
         dot.classList.add('fallback');
         text.textContent = 'FALLBACK — LOCAL JSON';
 
-        const resp = await fetch('itinerary.json');
+        const resp = await fetch('itinerary.json' + bust);
         const data = await resp.json();
         renderItinerary(data);
         renderInfoCards();
