@@ -454,7 +454,14 @@
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.day-weather {
+  font-size: 0.8rem;
+  color: var(--text-muted);
   margin-bottom: 24px;
+  opacity: 0.75;
 }
 
 .timeline {

@@ -3,6 +3,7 @@
     {
       "day": "Day 1 — Friday",
       "date": "April 17, 2026",
+      "weather": { "high": 53, "low": 31, "conditions": "Partly sunny, cool and crisp" },
       "events": [
         {
           "time": "4:00 PM",
@@ -45,6 +46,7 @@
     {
       "day": "Day 2 — Saturday",
       "date": "April 18, 2026",
+      "weather": { "high": 55, "low": 32, "conditions": "Mostly sunny, chilly evening" },
       "events": [
         {
           "time": "9:00 AM",
@@ -123,6 +125,7 @@
     {
       "day": "Day 3 — Sunday",
       "date": "April 19, 2026",
+      "weather": { "high": 51, "low": 29, "conditions": "Clear skies, cold morning" },
       "events": [
         {
           "time": "8:00 AM",

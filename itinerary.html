@@ -90,10 +90,15 @@
       let html = '';
 
       data.days.forEach(day => {
+        const weatherHtml = day.weather
+          ? `<p class="day-weather">🌤 ${day.weather.high}°F / ${day.weather.low}°F — ${day.weather.conditions}</p>`
+          : '';
+
         html += `
           <section class="itinerary-section">
             <h2 class="day-header">${day.day}</h2>
             <p class="day-date">${day.date}</p>
+            ${weatherHtml}
             <div class="timeline">
         `;
 
