@@ -32,13 +32,7 @@
         {
           "time": "9:00 PM",
           "title": "Cards / Poker / Hang",
-          "details": "Poker, Magic draft, whatever gets going. No schedule — just vibes.",
-          "category": "social"
-        },
-        {
-          "time": "Late",
-          "title": "Lakeside Bonfire",
-          "details": "Drinks, fire, stories, and the appropriate roasting of the groom.",
+          "details": "Poker, Magic draft, whatever gets going — spill out to the fire when it's time. Drinks, stories, and the appropriate roasting of the groom.",
           "category": "social"
         }
       ]
@@ -56,8 +50,8 @@
         },
         {
           "time": "10:30 AM",
-          "title": "Lake Time",
-          "details": "Walk the shore, dock session, take in the lake. Bring layers — crisp but gorgeous.",
+          "title": "TBD — Play Pickleball If Up For It",
+          "details": "Tahoe Paradise Park has free outdoor pickleball courts (~10 min drive). Or just hang at the house — no pressure.",
           "category": "outdoor"
         },
         {
@@ -147,8 +141,8 @@
         },
         {
           "time": "12:00 PM",
-          "title": "Topgolf — Roseville",
-          "details": "1700 Freedom Way, Roseville, CA. Book 2 side-by-side bays in advance. $37/hr per bay noon–5pm, up to 6 players per bay. Clubs provided.",
+          "title": "Topgolf — Roseville (Optional)",
+          "details": "1700 Freedom Way, Roseville, CA. Only if everyone's feeling up to it. Book 2 side-by-side bays in advance. $37/hr per bay noon–5pm, up to 6 players per bay. Clubs provided.",
           "category": "gaming"
         },
         {
