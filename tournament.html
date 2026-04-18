@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tournament of Champions — Myles's Bachelor Party</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/inner.css">
+  <style>
+    /* ── Champion of Champions ── */
+    .coc-section {
+      margin: 0 0 8px;
+    }
+    .coc-title {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: var(--champagne);
+      text-align: center;
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+    }
+    .coc-subtitle {
+      text-align: center;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .coc-list {
+      display: grid;
+      gap: 8px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .coc-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 18px;
+      background: var(--card-bg);
+      border: var(--gold-border);
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s;
+    }
+    .coc-item.coc-leader {
+      border-color: rgba(201, 165, 90, 0.5);
+      background: rgba(201, 165, 90, 0.06);
+      box-shadow: 0 0 24px rgba(201, 165, 90, 0.1);
+    }
+    .coc-item .coc-rank {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      color: var(--champagne);
+      min-width: 28px;
+      text-align: center;
+    }
+    .coc-item.coc-leader .coc-rank {
+      font-size: 1.5rem;
+    }
+    .coc-item .coc-name {
+      flex: 1;
+      font-size: 0.95rem;
+    }
+    .coc-item.coc-leader .coc-name {
+      color: var(--champagne-light);
+      font-size: 1rem;
+    }
+    .coc-item .coc-wins-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .coc-item .coc-wins {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      color: var(--text-primary);
+    }
+    .coc-item.coc-leader .coc-wins {
+      color: var(--champagne-light);
+      font-size: 1.5rem;
+    }
+    .coc-item .coc-trophies {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+    .coc-empty {
+      text-align: center;
+      padding: 28px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-style: italic;
+      letter-spacing: 0.12em;
+      background: var(--card-bg);
+      border: var(--gold-border);
+      border-radius: 8px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── Bracket section header ── */
+    .bracket-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 20px 0 12px;
+      flex-wrap: wrap;
+    }
+    .bracket-section-header h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 400;
+    }
+    .bracket-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    /* ── Reset button ── */
+    .bracket-reset-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 18px;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: var(--font-body);
+      border: 1px solid rgba(122, 32, 32, 0.4);
+      background: transparent;
+      color: var(--crimson-bright);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .bracket-reset-btn:hover {
+      background: rgba(122, 32, 32, 0.15);
+      border-color: var(--crimson-bright);
+    }
+
+    /* ── Champion display (top of each bracket) ── */
+    .bracket-champion-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 18px 24px;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, rgba(201, 165, 90, 0.08), rgba(12, 16, 20, 0.8));
+      border: 1px solid rgba(201, 165, 90, 0.25);
+      border-radius: 12px;
+      min-height: 72px;
+      transition: all 0.4s;
+    }
+    .bracket-champion-box.filled {
+      border-color: rgba(201, 165, 90, 0.5);
+      background: linear-gradient(135deg, rgba(201, 165, 90, 0.12), rgba(12, 16, 20, 0.9));
+      box-shadow: 0 0 30px rgba(201, 165, 90, 0.1);
+    }
+    .bracket-champion-box .champ-crown {
+      font-size: 2rem;
+      opacity: 0.25;
+      transition: all 0.4s;
+    }
+    .bracket-champion-box.filled .champ-crown {
+      opacity: 1;
+      animation: crownSpin 3s ease-in-out infinite;
+    }
+    @keyframes crownSpin {
+      0%, 100% { transform: rotate(-4deg) scale(1); }
+      50% { transform: rotate(4deg) scale(1.08); }
+    }
+    .bracket-champion-box .champ-text {
+      text-align: center;
+    }
+    .bracket-champion-box .champ-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .bracket-champion-box .champ-name {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .bracket-champion-box.filled .champ-name {
+      color: var(--champagne-light);
+      font-style: normal;
+    }
+
+    /* ── Bracket scroll wrapper ── */
+    .bracket-scroll {
+      overflow-x: auto;
+      overflow-y: visible;
+      padding: 12px 4px 20px;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+    .bracket-scroll::-webkit-scrollbar {
+      height: 4px;
+    }
+    .bracket-scroll::-webkit-scrollbar-track {
+      background: rgba(201, 165, 90, 0.05);
+      border-radius: 2px;
+    }
+    .bracket-scroll::-webkit-scrollbar-thumb {
+      background: rgba(201, 165, 90, 0.25);
+      border-radius: 2px;
+    }
+    .bracket-inner {
+      display: flex;
+      gap: 0;
+      align-items: flex-start;
+      min-width: max-content;
+      position: relative;
+    }
+
+    /* ── Bracket rounds ── */
+    .bracket-round {
+      display: flex;
+      flex-direction: column;
+      min-width: 160px;
+      width: 160px;
+    }
+    .bracket-round-title {
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      color: var(--champagne);
+      text-align: center;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: var(--gold-border);
+    }
+    .bracket-matches {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ── Match ── */
+    .match {
+      background: var(--card-bg);
+      border: var(--gold-border);
+      border-radius: 6px;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .match-slot {
+      padding: 9px 12px;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+      border-bottom: 1px solid rgba(201, 165, 90, 0.07);
+      line-height: 1.2;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      user-select: none;
+    }
+    .match-slot:last-child {
+      border-bottom: none;
+    }
+    .match-slot.selectable {
+      cursor: pointer;
+    }
+    .match-slot.selectable:hover {
+      background: rgba(201, 165, 90, 0.1);
+      color: var(--text-primary);
+    }
+    .match-slot.winner {
+      background: rgba(201, 165, 90, 0.13);
+      color: var(--champagne-light);
+      font-weight: 500;
+    }
+    .match-slot.winner::before {
+      content: '›';
+      margin-right: 6px;
+      color: var(--champagne);
+      font-weight: bold;
+    }
+    .match-slot.tbd {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.72rem;
+      cursor: default;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Connector column ── */
+    .bracket-connector-col {
+      width: 28px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-self: stretch;
+      margin-top: 28px; /* offset for round title height */
+    }
+    .connector-pair {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .connector-half {
+      flex: 1;
+    }
+    .connector-half.top {
+      border-right: 1px solid rgba(201, 165, 90, 0.22);
+      border-bottom: 1px solid rgba(201, 165, 90, 0.22);
+    }
+    .connector-half.bottom {
+      border-right: 1px solid rgba(201, 165, 90, 0.22);
+      border-top: 1px solid rgba(201, 165, 90, 0.22);
+    }
+    /* Simple single-line connector (play-in → slot) */
+    .connector-single {
+      flex: 1;
+      border-bottom: 1px solid rgba(201, 165, 90, 0.22);
+    }
+
+    /* ── Mobile hint ── */
+    .scroll-hint {
+      display: none;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    @media (max-width: 768px) {
+      .scroll-hint { display: block; }
+      .bracket-round { min-width: 140px; width: 140px; }
+      .match-slot { font-size: 0.78rem; padding: 8px 10px; }
+    }
+    @media (max-width: 480px) {
+      .bracket-round { min-width: 120px; width: 120px; }
+      .match-slot { font-size: 0.74rem; }
+      .bracket-round-title { font-size: 0.68rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bokeh-container">
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+  </div>
+
+  <div class="container">
+
+    <header class="inner-header">
+      <a href="index.html" class="back-link">← Back to Hub</a>
+      <h1>Tournament of Champions</h1>
+      <p class="subtitle">Who Reigns Supreme?</p>
+    </header>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <!-- Champion of Champions -->
+    <div class="coc-section">
+      <div class="coc-title">🏆 Champion of Champions</div>
+      <div class="coc-subtitle">Running tally across all tournaments</div>
+      <div class="coc-list" id="coc-list">
+        <div class="coc-empty">Pick tournament winners to see the leaderboard</div>
+      </div>
+    </div>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <!-- Tournament Tabs -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('melee')">🎮 Smash Bros</button>
+      <button class="tab-btn" onclick="switchTab('cornhole')">🎯 Cornhole</button>
+      <button class="tab-btn" onclick="switchTab('pool')">🎱 Pool</button>
+      <button class="tab-btn" onclick="switchTab('pingpong')">🏓 Ping Pong</button>
+    </div>
+
+    <!-- Tab content containers -->
+    <div class="tab-content active" id="tab-melee"></div>
+    <div class="tab-content" id="tab-cornhole"></div>
+    <div class="tab-content" id="tab-pool"></div>
+    <div class="tab-content" id="tab-pingpong"></div>
+
+    <footer class="site-footer">
+      <div class="footer-stats">
+        <span>4 Tournaments</span><span>·</span>
+        <span>1 Champion of Champions</span><span>·</span>
+        <span>∞ Bragging Rights</span><span>·</span>
+        <span>Tahoe</span>
+      </div>
+      <div class="footer-quote">
+        "I'll fight with everything I have!"
+        <br>
+        <span class="attribution">— Roy · Super Smash Bros. Melee</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="js/shared.js"></script>
+  <script>
+  // ─────────────────────────────────────────────────────────────
+  // Tournament Data
+  // ─────────────────────────────────────────────────────────────
+  // rounds: array of { name, matches: [{p1, p2}] }
+  // feeds: [fromRound, fromMatch, toRound, toMatch, toSlot (0=p1,1=p2)]
+  // For 10-player brackets: round 0 is a "play-in" with 2 matches,
+  // round 1 is QF with 4 matches (2 slots filled by play-in winners).
+
+  const TOURNAMENTS = [
+    {
+      id: 'melee',
+      name: 'Smash Bros Melee',
+      icon: '🎮',
+      desc: 'Roy is always our boy',
+      rounds: [
+        { name: 'Play-In', matches: [
+          { p1: 'Nik',  p2: 'Norman' },
+          { p1: 'Ben',  p2: 'Zack'   }
+        ]},
+        { name: 'Quarterfinals', matches: [
+          { p1: null,   p2: 'Sean'   },
+          { p1: null,   p2: 'Izik'   },
+          { p1: 'Noah', p2: 'Oliver' },
+          { p1: 'Myles',p2: 'Cam'   }
+        ]},
+        { name: 'Semifinals', matches: [
+          { p1: null, p2: null },
+          { p1: null, p2: null }
+        ]},
+        { name: 'Final', matches: [
+          { p1: null, p2: null }
+        ]}
+      ],
+      feeds: [
+        [0,0, 1,0,0],
+        [0,1, 1,1,0],
+        [1,0, 2,0,0],
+        [1,1, 2,0,1],
+        [1,2, 2,1,0],
+        [1,3, 2,1,1],
+        [2,0, 3,0,0],
+        [2,1, 3,0,1]
+      ]
+    },
+    {
+      id: 'cornhole',
+      name: 'Cornhole Tourney',
+      icon: '🎯',
+      desc: 'Bags fly, friendships die',
+      rounds: [
+        { name: 'Play-In', matches: [
+          { p1: 'Quest', p2: 'Nick'  },
+          { p1: 'Tom',   p2: 'Derek' }
+        ]},
+        { name: 'Quarterfinals', matches: [
+          { p1: null,    p2: 'Dump'  },
+          { p1: null,    p2: 'Noah'  },
+          { p1: 'Ben',   p2: 'Sean'  },
+          { p1: 'Myles', p2: 'Cam'  }
+        ]},
+        { name: 'Semifinals', matches: [
+          { p1: null, p2: null },
+          { p1: null, p2: null }
+        ]},
+        { name: 'Final', matches: [
+          { p1: null, p2: null }
+        ]}
+      ],
+      feeds: [
+        [0,0, 1,0,0],
+        [0,1, 1,1,0],
+        [1,0, 2,0,0],
+        [1,1, 2,0,1],
+        [1,2, 2,1,0],
+        [1,3, 2,1,1],
+        [2,0, 3,0,0],
+        [2,1, 3,0,1]
+      ]
+    },
+    {
+      id: 'pool',
+      name: 'Pool Tourney',
+      icon: '🎱',
+      desc: 'Eight ball, corner pocket',
+      rounds: [
+        { name: 'Quarterfinals', matches: [
+          { p1: 'Sean',  p2: 'Ben'    },
+          { p1: 'Izik',  p2: 'Nick'   },
+          { p1: 'Myles', p2: 'Oliver' },
+          { p1: 'Noah',  p2: 'Derek'  }
+        ]},
+        { name: 'Semifinals', matches: [
+          { p1: null, p2: null },
+          { p1: null, p2: null }
+        ]},
+        { name: 'Final', matches: [
+          { p1: null, p2: null }
+        ]}
+      ],
+      feeds: [
+        [0,0, 1,0,0],
+        [0,1, 1,0,1],
+        [0,2, 1,1,0],
+        [0,3, 1,1,1],
+        [1,0, 2,0,0],
+        [1,1, 2,0,1]
+      ]
+    },
+    {
+      id: 'pingpong',
+      name: 'Ping Pong Tourney',
+      icon: '🏓',
+      desc: 'Serve, rally, dominate',
+      rounds: [
+        { name: 'Quarterfinals', matches: [
+          { p1: 'Oliver', p2: 'Izik'  },
+          { p1: 'Noah',   p2: 'Nick'  },
+          { p1: 'Derek',  p2: 'Sean'  },
+          { p1: 'Myles',  p2: 'Ben'   }
+        ]},
+        { name: 'Semifinals', matches: [
+          { p1: null, p2: null },
+          { p1: null, p2: null }
+        ]},
+        { name: 'Final', matches: [
+          { p1: null, p2: null }
+        ]}
+      ],
+      feeds: [
+        [0,0, 1,0,0],
+        [0,1, 1,0,1],
+        [0,2, 1,1,0],
+        [0,3, 1,1,1],
+        [1,0, 2,0,0],
+        [1,1, 2,0,1]
+      ]
+    }
+  ];
+
+  // ─────────────────────────────────────────────────────────────
+  // State Management
+  // ─────────────────────────────────────────────────────────────
+  function getState(tid) {
+    try {
+      return JSON.parse(localStorage.getItem('tourn_' + tid) || '{}');
+    } catch(e) { return {}; }
+  }
+
+  function saveState(tid, state) {
+    localStorage.setItem('tourn_' + tid, JSON.stringify(state));
+  }
+
+  function getWinner(state, r, m) {
+    return (state.w || {})[r + '_' + m] || null;
+  }
+
+  function setMatchWinner(tid, r, m, player) {
+    const t = TOURNAMENTS.find(t => t.id === tid);
+    const state = getState(tid);
+    if (!state.w) state.w = {};
+    const key = r + '_' + m;
+
+    // Toggle: clicking current winner deselects
+    if (state.w[key] === player) {
+      delete state.w[key];
+      clearDownstream(t, state, r, m);
+    } else {
+      if (state.w[key]) clearDownstream(t, state, r, m);
+      state.w[key] = player;
+    }
+
+    saveState(tid, state);
+    renderTournament(t);
+    updateCOC();
+  }
+
+  function clearDownstream(tournament, state, fromR, fromM) {
+    const feed = tournament.feeds.find(f => f[0] === fromR && f[1] === fromM);
+    if (!feed) return;
+    const toKey = feed[2] + '_' + feed[3];
+    if (state.w && state.w[toKey]) {
+      clearDownstream(tournament, state, feed[2], feed[3]);
+      delete state.w[toKey];
+    }
+  }
+
+  function resetBracket(tid) {
+    localStorage.removeItem('tourn_' + tid);
+    const t = TOURNAMENTS.find(t => t.id === tid);
+    renderTournament(t);
+    updateCOC();
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Player Name Resolution
+  // ─────────────────────────────────────────────────────────────
+  function resolvePlayer(tournament, state, r, m, slot) {
+    const match = tournament.rounds[r].matches[m];
+    const staticName = slot === 0 ? match.p1 : match.p2;
+    if (staticName) return staticName;
+
+    // Find the feed that leads to this (r, m, slot)
+    const feed = tournament.feeds.find(f => f[2] === r && f[3] === m && f[4] === slot);
+    if (!feed) return null;
+    return getWinner(state, feed[0], feed[1]);
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Bracket Rendering
+  // ─────────────────────────────────────────────────────────────
+  function renderTournament(t) {
+    const container = document.getElementById('tab-' + t.id);
+    const state = getState(t.id);
+    const finalWinner = getWinner(state, t.rounds.length - 1, 0);
+
+    // ── champion box ──
+    let champHtml = `
+      <div class="bracket-champion-box${finalWinner ? ' filled' : ''}">
+        <span class="champ-crown">${finalWinner ? '👑' : '🏆'}</span>
+        <div class="champ-text">
+          <div class="champ-label">Tournament Champion</div>
+          <div class="champ-name">${finalWinner || 'TBD'}</div>
+        </div>
+      </div>`;
+
+    // ── bracket rounds ──
+    let bracketHtml = '';
+    for (let ri = 0; ri < t.rounds.length; ri++) {
+      const round = t.rounds[ri];
+      bracketHtml += `<div class="bracket-round" id="round-${t.id}-${ri}">`;
+      bracketHtml += `<div class="bracket-round-title">${round.name}</div>`;
+      bracketHtml += `<div class="bracket-matches" id="matches-${t.id}-${ri}">`;
+
+      for (let mi = 0; mi < round.matches.length; mi++) {
+        const winner = getWinner(state, ri, mi);
+        bracketHtml += `<div class="match" id="match-${t.id}-${ri}-${mi}">`;
+
+        for (let si = 0; si < 2; si++) {
+          const player = resolvePlayer(t, state, ri, mi, si);
+          const isWinner = player && player === winner;
+          const isTbd = !player;
+          const canSelect = !!player && !isTbd;
+
+          let cls = 'match-slot';
+          if (isTbd) cls += ' tbd';
+          else if (isWinner) cls += ' winner';
+          else if (canSelect) cls += ' selectable';
+
+          const label = isTbd ? 'TBD' : player;
+          const onclick = canSelect
+            ? `onclick="setMatchWinner('${t.id}',${ri},${mi},'${player.replace("'","\\'")}')"`
+            : '';
+
+          bracketHtml += `<div class="${cls}" ${onclick}>${label}</div>`;
+        }
+
+        bracketHtml += '</div>'; // .match
+      }
+
+      bracketHtml += '</div>'; // .bracket-matches
+      bracketHtml += '</div>'; // .bracket-round
+
+      // Add connector column between rounds (not after the last)
+      if (ri < t.rounds.length - 1) {
+        const currCount = round.matches.length;
+        const nextCount = t.rounds[ri + 1].matches.length;
+        bracketHtml += buildConnectorCol(t, ri, currCount, nextCount);
+      }
+    }
+
+    container.innerHTML = `
+      <div class="bracket-section-header">
+        <h3>${t.icon} ${t.name}</h3>
+        <button class="bracket-reset-btn" onclick="resetBracket('${t.id}')">↺ Reset</button>
+      </div>
+      <div class="bracket-desc">${t.desc}</div>
+      ${champHtml}
+      <div class="scroll-hint">← Scroll to see full bracket →</div>
+      <div class="bracket-scroll">
+        <div class="bracket-inner" id="bracket-inner-${t.id}">
+          ${bracketHtml}
+        </div>
+      </div>`;
+
+    // After DOM is inserted, align the rounds vertically
+    requestAnimationFrame(() => alignBracket(t));
+  }
+
+  // Build connector column HTML between two rounds
+  // If the match counts are 1:1 or play-in style, use single lines
+  // If 2:1 (standard bracket), use the elbow connector pairs
+  function buildConnectorCol(t, ri, currCount, nextCount) {
+    // How many connector pairs do we need?
+    // Each pair connects currCount/nextCount matches to 1 next-round match
+    const ratio = currCount / nextCount;
+
+    let inner = '';
+    if (Math.abs(ratio - 2) < 0.01) {
+      // Standard 2:1 — bracket elbow connectors
+      for (let i = 0; i < nextCount; i++) {
+        inner += `<div class="connector-pair">
+          <div class="connector-half top"></div>
+          <div class="connector-half bottom"></div>
+        </div>`;
+      }
+    } else if (ratio <= 1) {
+      // 1:1 or play-in → some slots (each match feeds into 1 slot)
+      // We need currCount single lines aligned to the currCount matches in context of nextCount
+      // Just show currCount single-line connectors spread over the space
+      for (let i = 0; i < currCount; i++) {
+        inner += `<div class="connector-single"></div>`;
+      }
+      // Pad remaining space
+      const remaining = nextCount - currCount;
+      for (let i = 0; i < remaining; i++) {
+        inner += `<div style="flex:1"></div>`;
+      }
+    } else {
+      // Fallback
+      inner = `<div style="flex:1;border-right:1px solid rgba(201,165,90,0.15)"></div>`;
+    }
+
+    return `<div class="bracket-connector-col" id="conn-${t.id}-${ri}" data-curr="${currCount}" data-next="${nextCount}">${inner}</div>`;
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Alignment: set margins/gaps so rounds align vertically
+  // ─────────────────────────────────────────────────────────────
+  function alignBracket(t) {
+    const inner = document.getElementById('bracket-inner-' + t.id);
+    if (!inner) return;
+
+    for (let ri = 1; ri < t.rounds.length; ri++) {
+      const prevMatchesEl = document.getElementById('matches-' + t.id + '-' + (ri - 1));
+      const currMatchesEl = document.getElementById('matches-' + t.id + '-' + ri);
+      const connCol = document.getElementById('conn-' + t.id + '-' + (ri - 1));
+      if (!prevMatchesEl || !currMatchesEl) continue;
+
+      const prevMatches = prevMatchesEl.querySelectorAll('.match');
+      const currMatches = currMatchesEl.querySelectorAll('.match');
+      if (!prevMatches.length || !currMatches.length) continue;
+
+      const matchH = prevMatches[0].offsetHeight;
+      const prevGap = parseInt(getComputedStyle(prevMatchesEl).gap) || 12;
+      const currCount = prevMatches.length;
+      const nextCount = currMatches.length;
+      const ratio = currCount / nextCount;
+
+      if (Math.abs(ratio - 2) < 0.01) {
+        // Standard bracket: each next-round match covers 2 prev-round matches
+        const groupH = 2 * matchH + prevGap;
+        const currMatchH = currMatches[0].offsetHeight;
+        const marginTop = (groupH - currMatchH) / 2;
+        const currGap = groupH - currMatchH;
+
+        currMatchesEl.style.gap = currGap + 'px';
+        currMatches[0].style.marginTop = Math.max(0, marginTop) + 'px';
+
+        // Size the connector col to match prev round content
+        if (connCol) {
+          const totalPrevH = currCount * matchH + (currCount - 1) * prevGap;
+          connCol.style.height = totalPrevH + 'px';
+          connCol.style.marginTop = '0';
+        }
+      } else if (ratio <= 1 && ratio > 0) {
+        // Play-in style: currCount < nextCount, each curr feeds one slot in next
+        // Align each play-in match to its target slot
+        const nextMatchH = currMatches[0].offsetHeight;
+        const nextGap = parseInt(getComputedStyle(currMatchesEl).gap) || 12;
+
+        if (connCol) {
+          // Height should span the full height of the next round
+          const totalNextH = nextCount * nextMatchH + (nextCount - 1) * nextGap;
+          connCol.style.height = totalNextH + 'px';
+        }
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Champion of Champions Leaderboard
+  // ─────────────────────────────────────────────────────────────
+  function updateCOC() {
+    const tally = {};
+    TOURNAMENTS.forEach(t => {
+      const state = getState(t.id);
+      const champion = getWinner(state, t.rounds.length - 1, 0);
+      if (champion) {
+        tally[champion] = (tally[champion] || 0) + 1;
+      }
+    });
+
+    const list = document.getElementById('coc-list');
+    const entries = Object.entries(tally).sort((a, b) => b[1] - a[1]);
+
+    if (entries.length === 0) {
+      list.innerHTML = '<div class="coc-empty">Pick tournament winners to see the leaderboard</div>';
+      return;
+    }
+
+    const maxWins = entries[0][1];
+    let html = '';
+    const rankSymbols = ['👑', '②', '③', '④', '⑤'];
+
+    entries.forEach(([name, wins], i) => {
+      const isLeader = wins === maxWins && i === 0;
+      const rank = isLeader ? '👑' : (i + 1);
+      const trophies = '🏆'.repeat(wins);
+      html += `
+        <div class="coc-item${isLeader ? ' coc-leader' : ''}">
+          <div class="coc-rank">${rank}</div>
+          <div class="coc-name">${name}</div>
+          <div class="coc-wins-wrap">
+            <div class="coc-wins">${wins}</div>
+            <div class="coc-trophies">${trophies}</div>
+          </div>
+        </div>`;
+    });
+
+    list.innerHTML = html;
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Tab Switching
+  // ─────────────────────────────────────────────────────────────
+  function switchTab(id) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.currentTarget.classList.add('active');
+    requestAnimationFrame(() => {
+      const t = TOURNAMENTS.find(t => t.id === id);
+      if (t) alignBracket(t);
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Init
+  // ─────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    TOURNAMENTS.forEach(t => renderTournament(t));
+    updateCOC();
+
+    // Re-align on resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        TOURNAMENTS.forEach(t => alignBracket(t));
+      }, 150);
+    });
+  });
+  </script>
+</body>
+</html>
