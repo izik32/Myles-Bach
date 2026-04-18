@@ -124,6 +124,12 @@
       });
     }
 
+    const KB_CLASSES = ['kb-1','kb-2','kb-3','kb-4','kb-5','kb-6'];
+
+    function randomKb() {
+      return KB_CLASSES[Math.floor(Math.random() * KB_CLASSES.length)];
+    }
+
     function buildSlides() {
       const wrapper = document.getElementById('slidesWrapper');
       const dots = document.getElementById('slideDots');
@@ -132,8 +138,12 @@
 
       photos.forEach((photo, i) => {
         const slide = document.createElement('div');
-        slide.className = 'slide' + (i === 0 ? ' active' : '');
-        slide.innerHTML = `<img src="${photo.url}" alt="${photo.name || 'Memory'}">`;
+        const kb = randomKb();
+        slide.className = 'slide ' + kb + (i === 0 ? ' active' : '');
+        slide.innerHTML = `
+          <div class="slide-bg" style="background-image:url('${photo.url}')"></div>
+          <img src="${photo.url}" alt="${photo.name || 'Memory'}">
+        `;
         wrapper.appendChild(slide);
 
         const dot = document.createElement('div');
@@ -149,7 +159,16 @@
       slides[currentSlide]?.classList.remove('active');
       dots[currentSlide]?.classList.remove('active');
       currentSlide = (index + photos.length) % photos.length;
-      slides[currentSlide]?.classList.add('active');
+
+      const slide = slides[currentSlide];
+      // Assign a fresh random Ken Burns direction
+      KB_CLASSES.forEach(c => slide.classList.remove(c));
+      slide.classList.add(randomKb());
+      // Re-trigger the animation
+      const img = slide.querySelector('img');
+      if (img) { img.style.animation = 'none'; void img.offsetWidth; img.style.animation = ''; }
+
+      slide.classList.add('active');
       dots[currentSlide]?.classList.add('active');
     }
 
