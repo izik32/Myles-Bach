@@ -386,8 +386,11 @@
   border-radius: 100px;
   pointer-events: all;
   backdrop-filter: blur(10px);
-  max-width: 400px;
-  margin: 0 auto 16px;
+  max-width: 280px;
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  z-index: 102;
 }
 
 .music-player .play-pause {
@@ -1323,7 +1326,7 @@
   .player-input-area { flex-direction: column; }
   .carpool-form { grid-template-columns: 1fr; }
   .slideshow-controls { gap: 12px; }
-  .music-player { max-width: 300px; }
+  .music-player { max-width: 240px; right: 16px; bottom: 80px; }
   .quote-card {
     grid-template-columns: auto 1fr;
     grid-template-rows: auto auto;
