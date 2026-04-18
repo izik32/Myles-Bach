@@ -1337,4 +1337,11 @@
     justify-content: flex-end;
   }
   .quote-overlay { padding: 24px; }
+  .slide-bg { filter: brightness(0.4) !important; }
+  .slide.kb-1 img { animation: kb1 6s ease-in-out forwards; }
+  .slide.kb-2 img { animation: kb2 6s ease-in-out forwards; }
+  .slide.kb-3 img { animation: kb3 6s ease-in-out forwards; }
+  .slide.kb-4 img { animation: kb4 6s ease-in-out forwards; }
+  .slide.kb-5 img { animation: kb5 5s ease-in-out forwards; }
+  .slide.kb-6 img { animation: kb6 5s ease-in-out forwards; }
 }
