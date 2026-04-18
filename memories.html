@@ -50,6 +50,7 @@
 
     <!-- Slide Controls -->
     <div class="slideshow-controls">
+      <button class="slide-btn" id="fullscreenBtn">⛶</button>
       <button class="slide-btn" id="prevBtn">‹</button>
       <div class="slide-dots" id="slideDots"></div>
       <button class="slide-btn" id="nextBtn">›</button>
@@ -301,6 +302,15 @@
     document.getElementById('nextBtn').onclick = () => {
       nextSlide();
       startSlideshow();
+    };
+
+    document.getElementById('fullscreenBtn').onclick = async () => {
+      const slideshow = document.getElementById('slideshow');
+      if (!document.fullscreenElement) {
+        await slideshow.requestFullscreen().catch(() => {});
+      } else {
+        await document.exitFullscreen().catch(() => {});
+      }
     };
 
     // Keyboard
