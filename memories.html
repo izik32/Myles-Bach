@@ -70,7 +70,7 @@
       appId: "1:818312719919:web:c988eb056286e2b01be0da"
     };
 
-    const SLIDE_DURATION = 12000;
+    const SLIDE_DURATION = 10500;
 
     let photos = [];
     let quotes = [];
@@ -196,9 +196,11 @@
         : '— <em style="text-decoration:line-through;">redacted</em>';
       authorEl.style.display = '';
 
-      // Fade in 1.8s after slide appears, fade out 2.5s before slide changes
-      slideQuoteShow = setTimeout(() => overlay.classList.add('visible'), 1800);
-      slideQuoteHide = setTimeout(() => overlay.classList.remove('visible'), SLIDE_DURATION - 2500);
+      // +0.5s: quote fades in (1.5s transition = fully visible at 2s)
+      // +8s: quote fades out (1.5s transition = gone at 9.5s)
+      // +10.5s: slide changes (1s after quote fully gone)
+      slideQuoteShow = setTimeout(() => overlay.classList.add('visible'), 500);
+      slideQuoteHide = setTimeout(() => overlay.classList.remove('visible'), 8000);
     }
 
     function nextSlide() { goToSlide(currentSlide + 1); }
