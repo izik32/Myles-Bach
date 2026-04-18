@@ -92,11 +92,15 @@
     async function loadPhotos() {
       if (firestoreDb) {
         try {
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Firebase timeout')), 3000)
+          );
           const q = query(collection(firestoreDb, 'photos'), orderBy('timestamp', 'desc'));
-          const snap = await getDocs(q);
+          const fetchPromise = getDocs(q);
+          const snap = await Promise.race([fetchPromise, timeoutPromise]);
           snap.forEach(doc => photos.push(doc.data()));
         } catch (e) {
-          console.log('Photos: Firestore unavailable, using localStorage');
+          console.log('Photos: Firestore unavailable or timeout, using localStorage');
         }
       }
 
@@ -111,16 +115,28 @@
       }
 
       buildSlides();
+      preloadImages();
+    }
+
+    function preloadImages() {
+      photos.forEach(photo => {
+        const img = new Image();
+        img.src = photo.url;
+      });
     }
 
     async function loadQuotes() {
       if (firestoreDb) {
         try {
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Firebase timeout')), 3000)
+          );
           const q = query(collection(firestoreDb, 'quotes'), orderBy('timestamp', 'desc'));
-          const snap = await getDocs(q);
+          const fetchPromise = getDocs(q);
+          const snap = await Promise.race([fetchPromise, timeoutPromise]);
           snap.forEach(doc => quotes.push(doc.data()));
         } catch (e) {
-          console.log('Quotes: Firestore unavailable, using localStorage');
+          console.log('Quotes: Firestore unavailable or timeout, using localStorage');
         }
       }
 
@@ -176,35 +192,45 @@
     }
 
     function scheduleSlideQuote() {
-      clearTimeout(slideQuoteShow);
-      clearTimeout(slideQuoteHide);
+      try {
+        clearTimeout(slideQuoteShow);
+        clearTimeout(slideQuoteHide);
 
-      const overlay = document.getElementById('quoteOverlay');
-      overlay.classList.remove('visible');
+        const overlay = document.getElementById('quoteOverlay');
+        if (!overlay) return;
+        overlay.classList.remove('visible');
 
-      if (!quotes || quotes.length === 0) return;
+        if (!quotes || quotes.length === 0) return;
 
-      if (quoteIndex >= quoteShuffle.length) shuffleQuotes();
-      const q = quoteShuffle[quoteIndex++];
-      if (!q) return;
+        if (quoteIndex >= quoteShuffle.length) shuffleQuotes();
+        const q = quoteShuffle[quoteIndex++];
+        if (!q) return;
 
-      const textEl = document.getElementById('quoteOverlayText');
-      const authorEl = document.getElementById('quoteOverlayAuthor');
-      textEl.innerHTML = escapeHtml(q.text);
-      authorEl.innerHTML = q.author
-        ? '— ' + escapeHtml(q.author)
-        : '— <em style="text-decoration:line-through;">redacted</em>';
-      authorEl.style.display = '';
+        const textEl = document.getElementById('quoteOverlayText');
+        const authorEl = document.getElementById('quoteOverlayAuthor');
+        if (!textEl || !authorEl) return;
 
-      // +0.5s: quote fades in (1.5s transition = fully visible at 2s)
-      // +8s: quote fades out (1.5s transition = gone at 9.5s)
-      // +10.5s: slide changes (1s after quote fully gone)
-      slideQuoteShow = setTimeout(() => overlay.classList.add('visible'), 500);
-      slideQuoteHide = setTimeout(() => overlay.classList.remove('visible'), 8000);
+        textEl.innerHTML = escapeHtml(q.text);
+        authorEl.innerHTML = q.author
+          ? '— ' + escapeHtml(q.author)
+          : '— <em style="text-decoration:line-through;">redacted</em>';
+        authorEl.style.display = '';
+
+        slideQuoteShow = setTimeout(() => overlay.classList.add('visible'), 500);
+        slideQuoteHide = setTimeout(() => overlay.classList.remove('visible'), 8000);
+      } catch(e) {
+        console.error('scheduleSlideQuote error:', e);
+      }
     }
 
-    function nextSlide() { goToSlide(currentSlide + 1); }
-    function prevSlide() { goToSlide(currentSlide - 1); }
+    function nextSlide() {
+      try { goToSlide(currentSlide + 1); }
+      catch(e) { console.error('nextSlide error:', e); }
+    }
+    function prevSlide() {
+      try { goToSlide(currentSlide - 1); }
+      catch(e) { console.error('prevSlide error:', e); }
+    }
 
     function startSlideshow() {
       if (slideInterval) clearInterval(slideInterval);
