@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quotes — Myles's Bachelor Party</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/inner.css">
+</head>
+<body>
+
+  <div class="bokeh-container">
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+    <div class="bokeh-orb"></div>
+  </div>
+
+  <div class="container">
+
+    <header class="inner-header">
+      <a href="index.html" class="back-link">← Back to Hub</a>
+      <h1>Quotes</h1>
+      <p class="subtitle">The Things That Must Be Remembered</p>
+      <div class="status-bar" id="quotesStatus">
+        <span class="status-dot" id="quotesDot"></span>
+        <span id="quotesStatusText">Connecting...</span>
+      </div>
+    </header>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <!-- Input -->
+    <section class="quote-input-section">
+      <div class="quote-form">
+        <textarea id="quoteText" placeholder="Drop a legendary line..." rows="3"></textarea>
+        <input type="text" id="quoteAuthor" placeholder="Who said it? (optional)">
+        <button class="btn btn-primary" id="addQuoteBtn">Add Quote</button>
+      </div>
+      <p class="quote-hint">Anyone can edit or delete any quote. Use your powers for good.</p>
+    </section>
+
+    <div class="gold-divider"><span class="ornament">◆</span></div>
+
+    <!-- List -->
+    <h2 style="text-align:center; margin-bottom: 8px;">The Record</h2>
+    <p style="text-align:center; font-size:0.8rem; color:var(--text-muted); margin-bottom: 24px;">
+      These play over the slideshow on the Memories page.
+    </p>
+    <div class="quotes-list" id="quotesList"></div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-stats">
+        <span>1 Groom to Send Off</span><span>·</span>
+        <span>∞ Memories Made</span><span>·</span>
+        <span>Tahoe</span>
+      </div>
+      <div class="footer-quote">
+        "I'll fight with everything I have!"<br>
+        <span class="attribution">— Roy · Super Smash Bros. Melee</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBFxIU0P2v1nFFBVdvTAqjh86-duehVfdI",
+      authDomain: "bach-party-photos.firebaseapp.com",
+      projectId: "bach-party-photos",
+      storageBucket: "bach-party-photos.firebasestorage.app",
+      messagingSenderId: "818312719919",
+      appId: "1:818312719919:web:c988eb056286e2b01be0da"
+    };
+
+    let db;
+    let firebaseReady = false;
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      firebaseReady = true;
+      document.getElementById('quotesDot').classList.remove('offline');
+      document.getElementById('quotesStatusText').textContent = 'Firebase Connected — Real-time Sync';
+    } catch (e) {
+      console.error('Firebase init failed:', e);
+      document.getElementById('quotesDot').classList.add('offline');
+      document.getElementById('quotesStatusText').textContent = 'Offline Mode';
+    }
+
+    const LS_KEY = 'mbp_quotes';
+
+    function loadLocal() {
+      return JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    }
+    function saveLocal(list) {
+      localStorage.setItem(LS_KEY, JSON.stringify(list));
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[c]));
+    }
+
+    function renderQuotes(quotes) {
+      const container = document.getElementById('quotesList');
+      if (!quotes || quotes.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:24px;">No quotes yet — be the first to immortalize someone.</p>';
+        return;
+      }
+
+      container.innerHTML = quotes.map(q => `
+        <div class="quote-card" data-id="${q.id}">
+          <div class="quote-mark">"</div>
+          <div class="quote-body">
+            <div class="quote-text">${escapeHtml(q.text)}</div>
+            ${q.author ? `<div class="quote-author">— ${escapeHtml(q.author)}</div>` : ''}
+          </div>
+          <div class="quote-actions">
+            <button class="quote-edit" data-id="${q.id}">Edit</button>
+            <button class="quote-delete" data-id="${q.id}">Delete</button>
+          </div>
+        </div>
+      `).join('');
+
+      container.querySelectorAll('.quote-edit').forEach(btn => {
+        btn.onclick = () => beginEdit(btn.dataset.id, quotes);
+      });
+      container.querySelectorAll('.quote-delete').forEach(btn => {
+        btn.onclick = () => removeQuote(btn.dataset.id);
+      });
+    }
+
+    function beginEdit(id, quotes) {
+      const q = quotes.find(x => x.id === id);
+      if (!q) return;
+      const card = document.querySelector(`.quote-card[data-id="${id}"]`);
+      if (!card) return;
+
+      card.classList.add('editing');
+      card.innerHTML = `
+        <div class="quote-body">
+          <textarea class="edit-text" rows="3">${escapeHtml(q.text)}</textarea>
+          <input type="text" class="edit-author" value="${escapeHtml(q.author || '')}" placeholder="Attribution (optional)">
+        </div>
+        <div class="quote-actions">
+          <button class="quote-save">Save</button>
+          <button class="quote-cancel">Cancel</button>
+        </div>
+      `;
+
+      card.querySelector('.quote-save').onclick = async () => {
+        const newText = card.querySelector('.edit-text').value.trim();
+        const newAuthor = card.querySelector('.edit-author').value.trim();
+        if (!newText) return alert('Quote cannot be empty');
+        await saveQuote(id, newText, newAuthor);
+      };
+      card.querySelector('.quote-cancel').onclick = () => {
+        if (firebaseReady) {
+          // live listener will re-render
+          renderQuotes(quotesCache);
+        } else {
+          renderLocal();
+        }
+      };
+    }
+
+    async function saveQuote(id, text, author) {
+      if (firebaseReady) {
+        await updateDoc(doc(db, 'quotes', id), { text, author, updated: serverTimestamp() });
+      } else {
+        const list = loadLocal();
+        const idx = list.findIndex(q => q.id === id);
+        if (idx >= 0) {
+          list[idx].text = text;
+          list[idx].author = author;
+          saveLocal(list);
+          renderLocal();
+        }
+      }
+    }
+
+    async function removeQuote(id) {
+      if (!confirm('Delete this quote?')) return;
+      if (firebaseReady) {
+        await deleteDoc(doc(db, 'quotes', id));
+      } else {
+        const list = loadLocal().filter(q => q.id !== id);
+        saveLocal(list);
+        renderLocal();
+      }
+    }
+
+    async function addQuote() {
+      const text = document.getElementById('quoteText').value.trim();
+      const author = document.getElementById('quoteAuthor').value.trim();
+      if (!text) return alert('Enter a quote first');
+
+      if (firebaseReady) {
+        await addDoc(collection(db, 'quotes'), {
+          text, author,
+          timestamp: serverTimestamp()
+        });
+      } else {
+        const list = loadLocal();
+        list.unshift({
+          id: 'local_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+          text, author,
+          timestamp: Date.now()
+        });
+        saveLocal(list);
+        renderLocal();
+      }
+
+      document.getElementById('quoteText').value = '';
+      document.getElementById('quoteAuthor').value = '';
+      document.getElementById('quoteText').focus();
+    }
+
+    document.getElementById('addQuoteBtn').onclick = addQuote;
+    document.getElementById('quoteText').addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') addQuote();
+    });
+
+    let quotesCache = [];
+
+    function renderLocal() {
+      quotesCache = loadLocal();
+      renderQuotes(quotesCache);
+    }
+
+    if (firebaseReady) {
+      const q = query(collection(db, 'quotes'), orderBy('timestamp', 'desc'));
+      onSnapshot(q, (snap) => {
+        quotesCache = [];
+        snap.forEach(d => quotesCache.push({ id: d.id, ...d.data() }));
+        renderQuotes(quotesCache);
+      }, (err) => {
+        console.error('Quotes listener error:', err);
+        document.getElementById('quotesDot').classList.add('offline');
+        document.getElementById('quotesStatusText').textContent = 'Offline — Using Local Storage';
+        firebaseReady = false;
+        renderLocal();
+      });
+    } else {
+      renderLocal();
+    }
+  </script>
+
+  <script src="js/shared.js"></script>
+</body>
+</html>

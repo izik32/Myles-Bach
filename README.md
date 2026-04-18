@@ -2,16 +2,15 @@
 
 **Lake Tahoe · Zephyr Cove · April 17–19, 2026**
 
-A dark luxury themed bachelor party website with Firebase integration for photo uploads and carpool coordination.
+A dark luxury themed bachelor party website with Firebase integration for photo uploads and quote collection.
 
 ## Pages
 
 - **index.html** — Main hub with nav cards, championship banner, and Roy quote
 - **photos.html** — Photo upload with Firebase Storage + gallery with lightbox
-- **memories.html** — Fullscreen slideshow with Ken Burns effect and music
+- **memories.html** — Fullscreen slideshow with Ken Burns effect, music, and quotes cycling artfully over the slides
 - **itinerary.html** — Schedule timeline from Google Sheets CSV (fallback to JSON)
-- **tournaments.html** — Bracket generator for Halo 3, Smash, MTG, Pool + Win Tracker
-- **carpool.html** — Real-time driver/rider coordination via Firestore
+- **quotes.html** — Collect legendary one-liners; anyone can add, edit, or delete. Quotes play over the Memories slideshow.
 
 ## Music Config
 
