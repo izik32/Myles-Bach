@@ -76,23 +76,29 @@
     let quotes = [];
     let currentSlide = 0;
     let slideInterval = null;
-    let firestoreDb = null;
     let audio = null;
     let slideQuoteShow, slideQuoteHide;
 
-    // Load photos
+    // Initialize Firebase once — both loaders share this instance
+    let firestoreDb = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      firestoreDb = getFirestore(app);
+    } catch (e) {
+      console.log('Firebase init failed, using localStorage');
+    }
+
     async function loadPhotos() {
-      try {
-        const app = initializeApp(firebaseConfig);
-        firestoreDb = getFirestore(app);
-        const q = query(collection(firestoreDb, 'photos'), orderBy('timestamp', 'desc'));
-        const snap = await getDocs(q);
-        snap.forEach(doc => photos.push(doc.data()));
-      } catch (e) {
-        console.log('Firebase unavailable, using localStorage');
+      if (firestoreDb) {
+        try {
+          const q = query(collection(firestoreDb, 'photos'), orderBy('timestamp', 'desc'));
+          const snap = await getDocs(q);
+          snap.forEach(doc => photos.push(doc.data()));
+        } catch (e) {
+          console.log('Photos: Firestore unavailable, using localStorage');
+        }
       }
 
-      // Merge local
       const local = JSON.parse(localStorage.getItem('mbp_photos') || '[]');
       const urls = new Set(photos.map(p => p.url));
       local.forEach(p => { if (!urls.has(p.url)) photos.push(p); });
@@ -107,16 +113,14 @@
     }
 
     async function loadQuotes() {
-      try {
-        if (!firestoreDb) {
-          const app = initializeApp(firebaseConfig);
-          firestoreDb = getFirestore(app);
+      if (firestoreDb) {
+        try {
+          const q = query(collection(firestoreDb, 'quotes'), orderBy('timestamp', 'desc'));
+          const snap = await getDocs(q);
+          snap.forEach(doc => quotes.push(doc.data()));
+        } catch (e) {
+          console.log('Quotes: Firestore unavailable, using localStorage');
         }
-        const q = query(collection(firestoreDb, 'quotes'), orderBy('timestamp', 'desc'));
-        const snap = await getDocs(q);
-        snap.forEach(doc => quotes.push(doc.data()));
-      } catch (e) {
-        console.log('Quotes: Firebase unavailable, using localStorage');
       }
 
       const local = JSON.parse(localStorage.getItem('mbp_quotes') || '[]');
