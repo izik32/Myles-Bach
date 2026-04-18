@@ -251,6 +251,7 @@
   height: 100%;
   opacity: 0;
   transition: opacity 1.5s ease;
+  will-change: opacity;
 }
 
 .slide.active {
@@ -273,16 +274,15 @@
   object-fit: contain;
   position: relative;
   z-index: 2;
-  will-change: transform;
 }
 
-/* Ken Burns variants — reassigned randomly per activation */
-.slide.kb-1 img { animation: kb1 8s ease-in-out forwards; }
-.slide.kb-2 img { animation: kb2 9s ease-in-out forwards; }
-.slide.kb-3 img { animation: kb3 8s ease-in-out forwards; }
-.slide.kb-4 img { animation: kb4 9s ease-in-out forwards; }
-.slide.kb-5 img { animation: kb5 7s ease-in-out forwards; }
-.slide.kb-6 img { animation: kb6 8s ease-in-out forwards; }
+/* Ken Burns variants — only animate on active slides */
+.slide.active.kb-1 img { animation: kb1 8s ease-in-out forwards; }
+.slide.active.kb-2 img { animation: kb2 9s ease-in-out forwards; }
+.slide.active.kb-3 img { animation: kb3 8s ease-in-out forwards; }
+.slide.active.kb-4 img { animation: kb4 9s ease-in-out forwards; }
+.slide.active.kb-5 img { animation: kb5 7s ease-in-out forwards; }
+.slide.active.kb-6 img { animation: kb6 8s ease-in-out forwards; }
 
 @keyframes kb1 {
   from { transform: scale(1) translate(0, 0); }
@@ -385,7 +385,6 @@
   border: 1px solid rgba(201, 165, 90, 0.15);
   border-radius: 100px;
   pointer-events: all;
-  backdrop-filter: blur(10px);
   max-width: 280px;
   position: fixed;
   bottom: 40px;
@@ -1338,10 +1337,17 @@
   }
   .quote-overlay { padding: 24px; }
   .slide-bg { filter: brightness(0.4) !important; }
-  .slide.kb-1 img { animation: kb1 6s ease-in-out forwards; }
-  .slide.kb-2 img { animation: kb2 6s ease-in-out forwards; }
-  .slide.kb-3 img { animation: kb3 6s ease-in-out forwards; }
-  .slide.kb-4 img { animation: kb4 6s ease-in-out forwards; }
-  .slide.kb-5 img { animation: kb5 5s ease-in-out forwards; }
-  .slide.kb-6 img { animation: kb6 5s ease-in-out forwards; }
+  .slide.active.kb-1 img { animation: kb1 6s ease-in-out forwards; }
+  .slide.active.kb-2 img { animation: kb2 6s ease-in-out forwards; }
+  .slide.active.kb-3 img { animation: kb3 6s ease-in-out forwards; }
+  .slide.active.kb-4 img { animation: kb4 6s ease-in-out forwards; }
+  .slide.active.kb-5 img { animation: kb5 5s ease-in-out forwards; }
+  .slide.active.kb-6 img { animation: kb6 5s ease-in-out forwards; }
+}
+
+/* Desktop only: restore backdrop-filter for music player */
+@media (min-width: 769px) {
+  .music-player {
+    backdrop-filter: blur(10px);
+  }
 }

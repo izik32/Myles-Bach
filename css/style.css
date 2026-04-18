@@ -497,6 +497,7 @@ a:hover {
   .nav-grid { grid-template-columns: 1fr; }
   .footer-stats { gap: 16px; font-size: 0.65rem; }
   .container { padding: 0 16px; }
+  body::before { display: none; }
   .champ-banner { padding: 24px; margin: 24px auto; }
 }
 
