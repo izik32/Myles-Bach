@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Memories — Myles's Bachelor Party</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Jost:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Jost:wght@300;400;500;600;700&display=swap"></noscript>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/inner.css">
 </head>
@@ -115,22 +119,9 @@
       }
 
       buildSlides();
-      preloadImages();
+      loadSlideImages(0);
     }
 
-    function preloadImages() {
-      // Lazy load: only preload current and next slide
-      if (photos.length === 0) return;
-      const nextIndex = (currentSlide + 1) % photos.length;
-      const indicesToLoad = [currentSlide, nextIndex];
-
-      indicesToLoad.forEach(idx => {
-        if (photos[idx]) {
-          const img = new Image();
-          img.src = photos[idx].url;
-        }
-      });
-    }
 
     async function loadQuotes() {
       if (firestoreDb) {
@@ -172,8 +163,8 @@
         const kb = randomKb();
         slide.className = 'slide ' + kb + (i === 0 ? ' active' : '');
         slide.innerHTML = `
-          <div class="slide-bg" style="background-image:url('${photo.url}')"></div>
-          <img src="${photo.url}" alt="${photo.name || 'Memory'}">
+          <div class="slide-bg" data-src="${photo.url}"></div>
+          <img data-src="${photo.url}" alt="${photo.name || 'Memory'}">
         `;
         wrapper.appendChild(slide);
 
@@ -181,6 +172,23 @@
         dot.className = 'slide-dot' + (i === 0 ? ' active' : '');
         dot.onclick = () => goToSlide(i);
         dots.appendChild(dot);
+      });
+    }
+
+    // Only load images for the current slide and the next two — avoids
+    // hammering Firebase Storage with N concurrent requests on page load.
+    function loadSlideImages(index) {
+      const slides = document.querySelectorAll('.slide');
+      const count = photos.length;
+      [0, 1, 2].forEach(offset => {
+        const i = (index + offset) % count;
+        const slide = slides[i];
+        if (!slide || slide.dataset.loaded) return;
+        slide.dataset.loaded = '1';
+        const bg = slide.querySelector('.slide-bg');
+        const img = slide.querySelector('img');
+        if (bg && bg.dataset.src) bg.style.backgroundImage = `url('${bg.dataset.src}')`;
+        if (img && img.dataset.src) img.src = img.dataset.src;
       });
     }
 
@@ -195,6 +203,7 @@
       slide.classList.add('active');
       dots[currentSlide]?.classList.add('active');
 
+      loadSlideImages(currentSlide);
       scheduleSlideQuote();
     }
 
@@ -284,7 +293,9 @@
       const track = getRandomTrack();
       if (!track) return;
 
-      audio = new Audio(track.file);
+      audio = new Audio();
+      audio.preload = 'none';
+      audio.src = track.file;
       audio.loop = true;
       document.getElementById('trackName').textContent = track.title;
 
