@@ -92,11 +92,15 @@
     async function loadPhotos() {
       if (firestoreDb) {
         try {
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Firebase timeout')), 3000)
+          );
           const q = query(collection(firestoreDb, 'photos'), orderBy('timestamp', 'desc'));
-          const snap = await getDocs(q);
+          const fetchPromise = getDocs(q);
+          const snap = await Promise.race([fetchPromise, timeoutPromise]);
           snap.forEach(doc => photos.push(doc.data()));
         } catch (e) {
-          console.log('Photos: Firestore unavailable, using localStorage');
+          console.log('Photos: Firestore unavailable or timeout, using localStorage');
         }
       }
 
@@ -116,11 +120,15 @@
     async function loadQuotes() {
       if (firestoreDb) {
         try {
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Firebase timeout')), 3000)
+          );
           const q = query(collection(firestoreDb, 'quotes'), orderBy('timestamp', 'desc'));
-          const snap = await getDocs(q);
+          const fetchPromise = getDocs(q);
+          const snap = await Promise.race([fetchPromise, timeoutPromise]);
           snap.forEach(doc => quotes.push(doc.data()));
         } catch (e) {
-          console.log('Quotes: Firestore unavailable, using localStorage');
+          console.log('Quotes: Firestore unavailable or timeout, using localStorage');
         }
       }
 
