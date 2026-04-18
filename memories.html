@@ -115,6 +115,14 @@
       }
 
       buildSlides();
+      preloadImages();
+    }
+
+    function preloadImages() {
+      photos.forEach(photo => {
+        const img = new Image();
+        img.src = photo.url;
+      });
     }
 
     async function loadQuotes() {
