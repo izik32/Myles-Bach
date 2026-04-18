@@ -472,6 +472,170 @@
       .group-pods { grid-template-columns: 1fr; }
       .championship-pod { max-width: 100%; }
     }
+
+    /* ── Bracket button group (undo + reset) ── */
+    .bracket-btn-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .bracket-undo-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: var(--font-body);
+      border: 1px solid rgba(201, 165, 90, 0.3);
+      background: transparent;
+      color: var(--champagne);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .bracket-undo-btn:hover {
+      background: rgba(201, 165, 90, 0.1);
+      border-color: var(--champagne);
+    }
+    .bracket-undo-btn.no-history {
+      opacity: 0.28;
+      pointer-events: none;
+    }
+
+    /* ── Toolbar (Edit Names button) ── */
+    .tourn-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin: 0 0 0;
+      padding: 10px 0 0;
+    }
+    .tourn-tool-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: var(--font-body);
+      border: var(--gold-border);
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .tourn-tool-btn:hover {
+      border-color: var(--champagne);
+      color: var(--champagne);
+    }
+
+    /* ── Edit Names Modal ── */
+    .edit-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 10, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 5000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      padding: 20px;
+    }
+    .edit-modal.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .edit-modal-card {
+      background: var(--obsidian-light);
+      border: 1px solid rgba(201, 165, 90, 0.3);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+    .edit-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: var(--gold-border);
+      flex-shrink: 0;
+    }
+    .edit-modal-header h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--champagne);
+    }
+    .edit-modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+    .edit-modal-close:hover { color: var(--text-primary); }
+    .edit-modal-body {
+      overflow-y: auto;
+      padding: 16px 24px;
+      flex: 1;
+    }
+    .edit-modal-body::-webkit-scrollbar { width: 4px; }
+    .edit-modal-body::-webkit-scrollbar-thumb { background: rgba(201,165,90,0.2); border-radius: 2px; }
+    .edit-name-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .edit-name-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      min-width: 90px;
+      flex-shrink: 0;
+      letter-spacing: 0.04em;
+    }
+    .edit-name-input {
+      flex: 1;
+      padding: 8px 12px;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      background: rgba(5, 8, 10, 0.6);
+      border: 1px solid rgba(201, 165, 90, 0.18);
+      border-radius: 6px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .edit-name-input:focus { border-color: var(--champagne); }
+    .edit-name-input::placeholder { color: var(--text-muted); }
+    .edit-modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      padding: 16px 24px 20px;
+      border-top: var(--gold-border);
+      flex-shrink: 0;
+    }
+    .edit-modal-note {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -504,6 +668,11 @@
 
     <div class="gold-divider"><span class="ornament">◆</span></div>
 
+    <!-- Toolbar -->
+    <div class="tourn-toolbar">
+      <button class="tourn-tool-btn" onclick="openEditModal()">✏ Edit Names</button>
+    </div>
+
     <!-- Tournament Tabs -->
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('melee')">🎮 Smash Bros</button>
@@ -517,6 +686,21 @@
     <div class="tab-content" id="tab-goldeneye"></div>
     <div class="tab-content" id="tab-pool"></div>
     <div class="tab-content" id="tab-pingpong"></div>
+
+    <!-- Edit Names Modal -->
+    <div id="edit-names-modal" class="edit-modal" onclick="if(event.target===this)closeEditModal()">
+      <div class="edit-modal-card">
+        <div class="edit-modal-header">
+          <h3>✏ Edit Player Names</h3>
+          <button class="edit-modal-close" onclick="closeEditModal()">✕</button>
+        </div>
+        <div class="edit-modal-body" id="edit-names-body"></div>
+        <div class="edit-modal-footer">
+          <button class="btn" onclick="closeEditModal()">Cancel</button>
+          <button class="btn btn-primary" onclick="saveEditedNames()">Save Changes</button>
+        </div>
+      </div>
+    </div>
 
     <footer class="site-footer">
       <div class="footer-stats">
@@ -649,10 +833,10 @@
   function setMatchWinner(tid, r, m, player) {
     const t = TOURNAMENTS.find(t => t.id === tid);
     const state = getState(tid);
+    pushHistory(state);
     if (!state.w) state.w = {};
     const key = r + '_' + m;
 
-    // Toggle: clicking current winner deselects
     if (state.w[key] === player) {
       delete state.w[key];
       clearDownstream(t, state, r, m);
@@ -684,14 +868,116 @@
   }
 
   // ─────────────────────────────────────────────────────────────
+  // Undo history
+  // ─────────────────────────────────────────────────────────────
+  function snapshotState(state) {
+    return {
+      w:     state.w     ? JSON.parse(JSON.stringify(state.w))     : {},
+      g:     state.g     ? JSON.parse(JSON.stringify(state.g))     : {},
+      champ: state.champ ?? null
+    };
+  }
+
+  function pushHistory(state) {
+    if (!state.hist) state.hist = [];
+    state.hist.push(snapshotState(state));
+    if (state.hist.length > 30) state.hist.shift();
+  }
+
+  function undoLast(tid) {
+    const state = getState(tid);
+    if (!state.hist || state.hist.length === 0) return;
+    const snap = state.hist.pop();
+    state.w     = snap.w     || {};
+    state.g     = snap.g     || {};
+    state.champ = snap.champ ?? null;
+    saveState(tid, state);
+    const t = TOURNAMENTS.find(t => t.id === tid);
+    renderTournament(t);
+    updateCOC();
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Custom player names
+  // ─────────────────────────────────────────────────────────────
+  function getPlayerNames() {
+    try { return JSON.parse(localStorage.getItem('tournament_names') || '{}'); }
+    catch(e) { return {}; }
+  }
+
+  function savePlayerNames(names) {
+    localStorage.setItem('tournament_names', JSON.stringify(names));
+  }
+
+  function dn(name) {                          // "display name"
+    if (!name) return name;
+    return getPlayerNames()[name] || name;
+  }
+
+  function getAllCanonicalPlayers() {
+    const players = new Set();
+    TOURNAMENTS.forEach(t => {
+      if (t.type === 'group') {
+        t.groups.forEach(g => g.players.forEach(p => players.add(p)));
+      } else {
+        t.rounds.forEach(r => r.matches.forEach(m => {
+          if (m.p1) players.add(m.p1);
+          if (m.p2) players.add(m.p2);
+        }));
+      }
+    });
+    return [...players].sort();
+  }
+
+  function openEditModal() {
+    const names = getPlayerNames();
+    const players = getAllCanonicalPlayers();
+    let html = '<div class="edit-modal-note">Leave blank to use the original name</div>';
+    players.forEach(p => {
+      const custom = names[p] || '';
+      html += `<div class="edit-name-row">
+        <label class="edit-name-label">${p}</label>
+        <input class="edit-name-input" data-canonical="${p}" value="${custom.replace(/"/g,'&quot;')}" placeholder="${p}">
+      </div>`;
+    });
+    document.getElementById('edit-names-body').innerHTML = html;
+    document.getElementById('edit-names-modal').classList.add('open');
+    // Focus first input
+    const first = document.querySelector('.edit-name-input');
+    if (first) setTimeout(() => first.focus(), 50);
+  }
+
+  function closeEditModal() {
+    document.getElementById('edit-names-modal').classList.remove('open');
+  }
+
+  function saveEditedNames() {
+    const names = {};
+    document.querySelectorAll('.edit-name-input').forEach(input => {
+      const canonical = input.dataset.canonical;
+      const custom = input.value.trim();
+      if (custom && custom !== canonical) names[canonical] = custom;
+    });
+    savePlayerNames(names);
+    closeEditModal();
+    TOURNAMENTS.forEach(t => renderTournament(t));
+    updateCOC();
+  }
+
+  // Close modal on Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeEditModal();
+  });
+
+  // ─────────────────────────────────────────────────────────────
   // Group-stage state & rendering
   // ─────────────────────────────────────────────────────────────
   function setGroupWinner(tid, gi, player) {
     const state = getState(tid);
+    pushHistory(state);
     if (!state.g) state.g = {};
     const key = 'g' + gi;
     state.g[key] = (state.g[key] === player) ? null : player;
-    // Changing a group winner clears the championship pick
     state.champ = null;
     saveState(tid, state);
     const t = TOURNAMENTS.find(t => t.id === tid);
@@ -701,6 +987,7 @@
 
   function setGroupChampion(tid, player) {
     const state = getState(tid);
+    pushHistory(state);
     state.champ = (state.champ === player) ? null : player;
     saveState(tid, state);
     const t = TOURNAMENTS.find(t => t.id === tid);
@@ -713,6 +1000,7 @@
     const state = getState(t.id);
     const groupWinners = t.groups.map((_, gi) => (state.g || {})['g' + gi] || null);
     const champion = state.champ || null;
+    const canUndo = (state.hist || []).length > 0;
 
     // champion box
     const champHtml = `
@@ -720,7 +1008,7 @@
         <span class="champ-crown">${champion ? '👑' : '🏆'}</span>
         <div class="champ-text">
           <div class="champ-label">Tournament Champion</div>
-          <div class="champ-name">${champion || 'TBD'}</div>
+          <div class="champ-name">${champion ? dn(champion) : 'TBD'}</div>
         </div>
       </div>`;
 
@@ -733,13 +1021,13 @@
       group.players.forEach(p => {
         const isW = p === winner;
         const cls = isW ? 'group-player winner' : 'group-player selectable';
-        podsHtml += `<div class="${cls}" onclick="setGroupWinner('${t.id}',${gi},'${p.replace(/'/g,"\\'")}'">${p}</div>`;
+        podsHtml += `<div class="${cls}" onclick="setGroupWinner('${t.id}',${gi},'${p.replace(/'/g,"\\'")}'">${dn(p)}</div>`;
       });
       podsHtml += '</div>';
     });
     podsHtml += '</div>';
 
-    // championship pod — always show, TBD slots until groups are picked
+    // championship pod
     let champPodHtml = `
       <div class="championship-section">
         <div class="championship-arrow">Championship</div>
@@ -751,7 +1039,7 @@
       } else {
         const isChamp = w === champion;
         const cls = isChamp ? 'group-player champ' : 'group-player selectable';
-        champPodHtml += `<div class="${cls}" onclick="setGroupChampion('${t.id}','${w.replace(/'/g,"\\'")}'">${w}</div>`;
+        champPodHtml += `<div class="${cls}" onclick="setGroupChampion('${t.id}','${w.replace(/'/g,"\\'")}'">${dn(w)}</div>`;
       }
     });
     champPodHtml += `</div></div>`;
@@ -759,7 +1047,10 @@
     container.innerHTML = `
       <div class="bracket-section-header">
         <h3>${t.icon} ${t.name}</h3>
-        <button class="bracket-reset-btn" onclick="resetBracket('${t.id}')">↺ Reset</button>
+        <div class="bracket-btn-group">
+          <button class="bracket-undo-btn${canUndo ? '' : ' no-history'}" onclick="undoLast('${t.id}')">↩ Undo</button>
+          <button class="bracket-reset-btn" onclick="resetBracket('${t.id}')">↺ Reset</button>
+        </div>
       </div>
       <div class="bracket-desc">${t.desc}</div>
       ${champHtml}
@@ -792,6 +1083,7 @@
     const container = document.getElementById('tab-' + t.id);
     const state = getState(t.id);
     const finalWinner = getWinner(state, t.rounds.length - 1, 0);
+    const canUndo = (state.hist || []).length > 0;
 
     // ── champion box ──
     let champHtml = `
@@ -799,7 +1091,7 @@
         <span class="champ-crown">${finalWinner ? '👑' : '🏆'}</span>
         <div class="champ-text">
           <div class="champ-label">Tournament Champion</div>
-          <div class="champ-name">${finalWinner || 'TBD'}</div>
+          <div class="champ-name">${finalWinner ? dn(finalWinner) : 'TBD'}</div>
         </div>
       </div>`;
 
@@ -826,7 +1118,7 @@
           else if (isWinner) cls += ' winner';
           else if (canSelect) cls += ' selectable';
 
-          const label = isTbd ? 'TBD' : player;
+          const label = isTbd ? 'TBD' : dn(player);
           const onclick = canSelect
             ? `onclick="setMatchWinner('${t.id}',${ri},${mi},'${player.replace("'","\\'")}')"`
             : '';
@@ -851,7 +1143,10 @@
     container.innerHTML = `
       <div class="bracket-section-header">
         <h3>${t.icon} ${t.name}</h3>
-        <button class="bracket-reset-btn" onclick="resetBracket('${t.id}')">↺ Reset</button>
+        <div class="bracket-btn-group">
+          <button class="bracket-undo-btn${canUndo ? '' : ' no-history'}" onclick="undoLast('${t.id}')">↩ Undo</button>
+          <button class="bracket-reset-btn" onclick="resetBracket('${t.id}')">↺ Reset</button>
+        </div>
       </div>
       <div class="bracket-desc">${t.desc}</div>
       ${champHtml}
@@ -991,7 +1286,7 @@
       html += `
         <div class="coc-item${isLeader ? ' coc-leader' : ''}">
           <div class="coc-rank">${rank}</div>
-          <div class="coc-name">${name}</div>
+          <div class="coc-name">${dn(name)}</div>
           <div class="coc-wins-wrap">
             <div class="coc-wins">${wins}</div>
             <div class="coc-trophies">${trophies}</div>
