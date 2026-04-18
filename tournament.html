@@ -349,6 +349,129 @@
       .match-slot { font-size: 0.74rem; }
       .bracket-round-title { font-size: 0.68rem; }
     }
+
+    /* ── Group-stage layout (Melee, GoldenEye) ── */
+    .group-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .group-pods {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .group-pod {
+      background: var(--card-bg);
+      border: var(--gold-border);
+      border-radius: 8px;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+    .group-pod-title {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      color: var(--champagne);
+      text-align: center;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 10px 14px 9px;
+      border-bottom: var(--gold-border);
+      background: rgba(201, 165, 90, 0.04);
+    }
+    .group-player {
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid rgba(201, 165, 90, 0.07);
+      transition: all 0.2s;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 38px;
+    }
+    .group-player:last-child { border-bottom: none; }
+    .group-player.selectable:hover {
+      background: rgba(201, 165, 90, 0.1);
+      color: var(--text-primary);
+    }
+    .group-player.winner {
+      background: rgba(201, 165, 90, 0.13);
+      color: var(--champagne-light);
+      font-weight: 500;
+    }
+    .group-player.winner::before {
+      content: '›';
+      color: var(--champagne);
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .group-player.tbd {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.75rem;
+      cursor: default;
+    }
+
+    /* ── Championship pod ── */
+    .championship-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .championship-arrow {
+      font-size: 1.2rem;
+      color: rgba(201, 165, 90, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .championship-arrow::before,
+    .championship-arrow::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 1px;
+      background: rgba(201, 165, 90, 0.25);
+    }
+    .championship-pod {
+      background: var(--card-bg);
+      border: 1px solid rgba(201, 165, 90, 0.3);
+      border-radius: 8px;
+      overflow: hidden;
+      width: 100%;
+      max-width: 320px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(201, 165, 90, 0.06);
+    }
+    .championship-pod-title {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      color: var(--champagne);
+      text-align: center;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 11px 14px 9px;
+      border-bottom: 1px solid rgba(201, 165, 90, 0.2);
+      background: rgba(201, 165, 90, 0.06);
+    }
+    .group-player.champ {
+      background: rgba(201, 165, 90, 0.16);
+      color: var(--champagne-light);
+      font-weight: 500;
+    }
+    .group-player.champ::before {
+      content: '👑';
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 640px) {
+      .group-pods { grid-template-columns: 1fr; }
+      .championship-pod { max-width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -384,14 +507,14 @@
     <!-- Tournament Tabs -->
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('melee')">🎮 Smash Bros</button>
-      <button class="tab-btn" onclick="switchTab('cornhole')">🎯 Cornhole</button>
+      <button class="tab-btn" onclick="switchTab('goldeneye')">🔫 GoldenEye</button>
       <button class="tab-btn" onclick="switchTab('pool')">🎱 Pool</button>
       <button class="tab-btn" onclick="switchTab('pingpong')">🏓 Ping Pong</button>
     </div>
 
     <!-- Tab content containers -->
     <div class="tab-content active" id="tab-melee"></div>
-    <div class="tab-content" id="tab-cornhole"></div>
+    <div class="tab-content" id="tab-goldeneye"></div>
     <div class="tab-content" id="tab-pool"></div>
     <div class="tab-content" id="tab-pingpong"></div>
 
@@ -424,72 +547,26 @@
   const TOURNAMENTS = [
     {
       id: 'melee',
+      type: 'group',
       name: 'Smash Bros Melee',
       icon: '🎮',
       desc: 'Roy is always our boy',
-      rounds: [
-        { name: 'Play-In', matches: [
-          { p1: 'Nik',  p2: 'Norman' },
-          { p1: 'Ben',  p2: 'Zack'   }
-        ]},
-        { name: 'Quarterfinals', matches: [
-          { p1: null,   p2: 'Sean'   },
-          { p1: null,   p2: 'Izik'   },
-          { p1: 'Noah', p2: 'Oliver' },
-          { p1: 'Myles',p2: 'Cam'   }
-        ]},
-        { name: 'Semifinals', matches: [
-          { p1: null, p2: null },
-          { p1: null, p2: null }
-        ]},
-        { name: 'Final', matches: [
-          { p1: null, p2: null }
-        ]}
-      ],
-      feeds: [
-        [0,0, 1,0,0],
-        [0,1, 1,1,0],
-        [1,0, 2,0,0],
-        [1,1, 2,0,1],
-        [1,2, 2,1,0],
-        [1,3, 2,1,1],
-        [2,0, 3,0,0],
-        [2,1, 3,0,1]
+      groups: [
+        { name: 'Group A', players: ['Nick',  'Damion', 'Ben'   ] },
+        { name: 'Group B', players: ['Derek', 'Sean',   'Izik'  ] },
+        { name: 'Group C', players: ['Noah',  'Oliver', 'Myles' ] }
       ]
     },
     {
-      id: 'cornhole',
-      name: 'Cornhole Tourney',
-      icon: '🎯',
-      desc: 'Bags fly, friendships die',
-      rounds: [
-        { name: 'Play-In', matches: [
-          { p1: 'Quest', p2: 'Nick'  },
-          { p1: 'Tom',   p2: 'Derek' }
-        ]},
-        { name: 'Quarterfinals', matches: [
-          { p1: null,    p2: 'Dump'  },
-          { p1: null,    p2: 'Noah'  },
-          { p1: 'Ben',   p2: 'Sean'  },
-          { p1: 'Myles', p2: 'Cam'  }
-        ]},
-        { name: 'Semifinals', matches: [
-          { p1: null, p2: null },
-          { p1: null, p2: null }
-        ]},
-        { name: 'Final', matches: [
-          { p1: null, p2: null }
-        ]}
-      ],
-      feeds: [
-        [0,0, 1,0,0],
-        [0,1, 1,1,0],
-        [1,0, 2,0,0],
-        [1,1, 2,0,1],
-        [1,2, 2,1,0],
-        [1,3, 2,1,1],
-        [2,0, 3,0,0],
-        [2,1, 3,0,1]
+      id: 'goldeneye',
+      type: 'group',
+      name: 'GoldenEye Tourney',
+      icon: '🔫',
+      desc: 'The name is Bond, license to frag',
+      groups: [
+        { name: 'Group A', players: ['Derek',  'Nick',  'Oliver'] },
+        { name: 'Group B', players: ['Damion', 'Noah',  'Izik'  ] },
+        { name: 'Group C', players: ['Ben',    'Sean',  'Myles' ] }
       ]
     },
     {
@@ -499,10 +576,10 @@
       desc: 'Eight ball, corner pocket',
       rounds: [
         { name: 'Quarterfinals', matches: [
-          { p1: 'Sean',  p2: 'Ben'    },
-          { p1: 'Izik',  p2: 'Nick'   },
-          { p1: 'Myles', p2: 'Oliver' },
-          { p1: 'Noah',  p2: 'Derek'  }
+          { p1: 'Sean',         p2: 'Ben'          },
+          { p1: 'Izik',         p2: 'Nick'         },
+          { p1: 'Myles',        p2: 'Oliver/Damion' },
+          { p1: 'Noah',         p2: 'Derek'        }
         ]},
         { name: 'Semifinals', matches: [
           { p1: null, p2: null },
@@ -528,10 +605,10 @@
       desc: 'Serve, rally, dominate',
       rounds: [
         { name: 'Quarterfinals', matches: [
-          { p1: 'Oliver', p2: 'Izik'  },
-          { p1: 'Noah',   p2: 'Nick'  },
-          { p1: 'Derek',  p2: 'Sean'  },
-          { p1: 'Myles',  p2: 'Ben'   }
+          { p1: 'Oliver',      p2: 'Izik'        },
+          { p1: 'Noah/Damion', p2: 'Nick'        },
+          { p1: 'Derek',       p2: 'Sean'        },
+          { p1: 'Myles',       p2: 'Ben'         }
         ]},
         { name: 'Semifinals', matches: [
           { p1: null, p2: null },
@@ -607,6 +684,92 @@
   }
 
   // ─────────────────────────────────────────────────────────────
+  // Group-stage state & rendering
+  // ─────────────────────────────────────────────────────────────
+  function setGroupWinner(tid, gi, player) {
+    const state = getState(tid);
+    if (!state.g) state.g = {};
+    const key = 'g' + gi;
+    state.g[key] = (state.g[key] === player) ? null : player;
+    // Changing a group winner clears the championship pick
+    state.champ = null;
+    saveState(tid, state);
+    const t = TOURNAMENTS.find(t => t.id === tid);
+    renderTournament(t);
+    updateCOC();
+  }
+
+  function setGroupChampion(tid, player) {
+    const state = getState(tid);
+    state.champ = (state.champ === player) ? null : player;
+    saveState(tid, state);
+    const t = TOURNAMENTS.find(t => t.id === tid);
+    renderTournament(t);
+    updateCOC();
+  }
+
+  function renderGroupTournament(t) {
+    const container = document.getElementById('tab-' + t.id);
+    const state = getState(t.id);
+    const groupWinners = t.groups.map((_, gi) => (state.g || {})['g' + gi] || null);
+    const champion = state.champ || null;
+
+    // champion box
+    const champHtml = `
+      <div class="bracket-champion-box${champion ? ' filled' : ''}">
+        <span class="champ-crown">${champion ? '👑' : '🏆'}</span>
+        <div class="champ-text">
+          <div class="champ-label">Tournament Champion</div>
+          <div class="champ-name">${champion || 'TBD'}</div>
+        </div>
+      </div>`;
+
+    // group pods
+    let podsHtml = '<div class="group-pods">';
+    t.groups.forEach((group, gi) => {
+      const winner = groupWinners[gi];
+      podsHtml += `<div class="group-pod">
+        <div class="group-pod-title">${group.name}</div>`;
+      group.players.forEach(p => {
+        const isW = p === winner;
+        const cls = isW ? 'group-player winner' : 'group-player selectable';
+        podsHtml += `<div class="${cls}" onclick="setGroupWinner('${t.id}',${gi},'${p.replace(/'/g,"\\'")}'">${p}</div>`;
+      });
+      podsHtml += '</div>';
+    });
+    podsHtml += '</div>';
+
+    // championship pod — always show, TBD slots until groups are picked
+    let champPodHtml = `
+      <div class="championship-section">
+        <div class="championship-arrow">Championship</div>
+        <div class="championship-pod">
+          <div class="championship-pod-title">🏆 Championship Round</div>`;
+    groupWinners.forEach((w, gi) => {
+      if (!w) {
+        champPodHtml += `<div class="group-player tbd">Group ${String.fromCharCode(65+gi)} winner TBD</div>`;
+      } else {
+        const isChamp = w === champion;
+        const cls = isChamp ? 'group-player champ' : 'group-player selectable';
+        champPodHtml += `<div class="${cls}" onclick="setGroupChampion('${t.id}','${w.replace(/'/g,"\\'")}'">${w}</div>`;
+      }
+    });
+    champPodHtml += `</div></div>`;
+
+    container.innerHTML = `
+      <div class="bracket-section-header">
+        <h3>${t.icon} ${t.name}</h3>
+        <button class="bracket-reset-btn" onclick="resetBracket('${t.id}')">↺ Reset</button>
+      </div>
+      <div class="bracket-desc">${t.desc}</div>
+      ${champHtml}
+      <div class="group-stage">
+        ${podsHtml}
+        ${champPodHtml}
+      </div>`;
+  }
+
+  // ─────────────────────────────────────────────────────────────
   // Player Name Resolution
   // ─────────────────────────────────────────────────────────────
   function resolvePlayer(tournament, state, r, m, slot) {
@@ -624,6 +787,8 @@
   // Bracket Rendering
   // ─────────────────────────────────────────────────────────────
   function renderTournament(t) {
+    if (t.type === 'group') { renderGroupTournament(t); return; }
+
     const container = document.getElementById('tab-' + t.id);
     const state = getState(t.id);
     const finalWinner = getWinner(state, t.rounds.length - 1, 0);
@@ -799,7 +964,9 @@
     const tally = {};
     TOURNAMENTS.forEach(t => {
       const state = getState(t.id);
-      const champion = getWinner(state, t.rounds.length - 1, 0);
+      const champion = t.type === 'group'
+        ? (state.champ || null)
+        : getWinner(state, t.rounds.length - 1, 0);
       if (champion) {
         tally[champion] = (tally[champion] || 0) + 1;
       }
@@ -845,7 +1012,7 @@
     event.currentTarget.classList.add('active');
     requestAnimationFrame(() => {
       const t = TOURNAMENTS.find(t => t.id === id);
-      if (t) alignBracket(t);
+      if (t && t.type !== 'group') alignBracket(t);
     });
   }
 
@@ -856,12 +1023,12 @@
     TOURNAMENTS.forEach(t => renderTournament(t));
     updateCOC();
 
-    // Re-align on resize
+    // Re-align brackets on resize (group tournaments don't need alignment)
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        TOURNAMENTS.forEach(t => alignBracket(t));
+        TOURNAMENTS.forEach(t => { if (t.type !== 'group') alignBracket(t); });
       }, 150);
     });
   });
