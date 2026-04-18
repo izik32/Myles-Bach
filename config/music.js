@@ -8,6 +8,10 @@ const MUSIC_TRACKS = [
     "file": "assets/music/Glory Tahoe Days.mp3"
   },
   {
+    "title": "Myles Wallet Out",
+    "file": "assets/music/Myles Wallet Out.mp3"
+  },
+  {
     "title": "Tahoe Boys Party Energy",
     "file": "assets/music/Tahoe Boys Party Energy.mp3"
   },
