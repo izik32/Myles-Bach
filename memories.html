@@ -26,7 +26,7 @@
       <div class="quote-overlay-inner">
         <div class="quote-overlay-mark">&ldquo;</div>
         <div class="quote-overlay-text" id="quoteOverlayText"></div>
-        <div class="quote-overlay-endmark">&rdquo;</div>
+        <div class="quote-overlay-endmark">&ldquo;</div>
         <div class="quote-overlay-author" id="quoteOverlayAuthor"></div>
       </div>
     </div>
@@ -70,13 +70,15 @@
       appId: "1:818312719919:web:c988eb056286e2b01be0da"
     };
 
+    const SLIDE_DURATION = 12000;
+
     let photos = [];
     let quotes = [];
     let currentSlide = 0;
     let slideInterval = null;
-    let quoteInterval = null;
     let firestoreDb = null;
     let audio = null;
+    let slideQuoteShow, slideQuoteHide;
 
     // Load photos
     async function loadPhotos() {
@@ -162,15 +164,41 @@
       currentSlide = (index + photos.length) % photos.length;
 
       const slide = slides[currentSlide];
-      // Assign a fresh random Ken Burns direction
       KB_CLASSES.forEach(c => slide.classList.remove(c));
       slide.classList.add(randomKb());
-      // Re-trigger the animation
       const img = slide.querySelector('img');
       if (img) { img.style.animation = 'none'; void img.offsetWidth; img.style.animation = ''; }
 
       slide.classList.add('active');
       dots[currentSlide]?.classList.add('active');
+
+      scheduleSlideQuote();
+    }
+
+    function scheduleSlideQuote() {
+      clearTimeout(slideQuoteShow);
+      clearTimeout(slideQuoteHide);
+
+      const overlay = document.getElementById('quoteOverlay');
+      overlay.classList.remove('visible');
+
+      if (!quotes || quotes.length === 0) return;
+
+      if (quoteIndex >= quoteShuffle.length) shuffleQuotes();
+      const q = quoteShuffle[quoteIndex++];
+      if (!q) return;
+
+      const textEl = document.getElementById('quoteOverlayText');
+      const authorEl = document.getElementById('quoteOverlayAuthor');
+      textEl.innerHTML = escapeHtml(q.text);
+      authorEl.innerHTML = q.author
+        ? '— ' + escapeHtml(q.author)
+        : '— <em style="text-decoration:line-through;">redacted</em>';
+      authorEl.style.display = '';
+
+      // Fade in 1.8s after slide appears, fade out 2.5s before slide changes
+      slideQuoteShow = setTimeout(() => overlay.classList.add('visible'), 1800);
+      slideQuoteHide = setTimeout(() => overlay.classList.remove('visible'), SLIDE_DURATION - 2500);
     }
 
     function nextSlide() { goToSlide(currentSlide + 1); }
@@ -178,7 +206,7 @@
 
     function startSlideshow() {
       if (slideInterval) clearInterval(slideInterval);
-      slideInterval = setInterval(nextSlide, 6000);
+      slideInterval = setInterval(nextSlide, SLIDE_DURATION);
     }
 
     // ===== Quotes over slideshow =====
@@ -200,40 +228,9 @@
       quoteIndex = 0;
     }
 
-    function showNextQuote() {
-      if (!quotes || quotes.length === 0) return;
-      if (quoteIndex >= quoteShuffle.length) shuffleQuotes();
-      const q = quoteShuffle[quoteIndex++];
-      if (!q) return;
-
-      const overlay = document.getElementById('quoteOverlay');
-      const textEl = document.getElementById('quoteOverlayText');
-      const authorEl = document.getElementById('quoteOverlayAuthor');
-
-      textEl.innerHTML = escapeHtml(q.text);
-      authorEl.innerHTML = q.author
-        ? '— ' + escapeHtml(q.author)
-        : '— <em style="text-decoration:line-through;">redacted</em>';
-      authorEl.style.display = '';
-
-      overlay.classList.remove('visible');
-      // Force reflow so the re-add triggers the transition
-      void overlay.offsetWidth;
-      overlay.classList.add('visible');
-
-      clearTimeout(showNextQuote._hideT);
-      showNextQuote._hideT = setTimeout(() => {
-        overlay.classList.remove('visible');
-      }, 7000);
-    }
-
     function startQuotes() {
-      if (quoteInterval) clearInterval(quoteInterval);
-      if (!quotes || quotes.length === 0) return;
-      shuffleQuotes();
-      // First quote appears after a moment, then cycles
-      setTimeout(showNextQuote, 2500);
-      quoteInterval = setInterval(showNextQuote, 11000);
+      if (quotes.length > 0) shuffleQuotes();
+      // First quote triggered by scheduleSlideQuote() inside goToSlide on start
     }
 
     // Music
@@ -284,8 +281,9 @@
     document.getElementById('startOverlay').onclick = () => {
       document.getElementById('startOverlay').classList.add('hidden');
       document.getElementById('controlsOverlay').style.display = '';
+      if (quotes.length > 0) shuffleQuotes();
       startSlideshow();
-      startQuotes();
+      scheduleSlideQuote();
       initMusic();
     };
 

@@ -1287,6 +1287,8 @@
   margin-top: 12px;
   opacity: 0.7;
   text-shadow: 0 2px 30px rgba(0, 0, 0, 0.8);
+  display: inline-block;
+  transform: scaleX(-1);
 }
 
 .quote-overlay-text {
