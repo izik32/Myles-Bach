@@ -169,11 +169,6 @@
       currentSlide = (index + photos.length) % photos.length;
 
       const slide = slides[currentSlide];
-      KB_CLASSES.forEach(c => slide.classList.remove(c));
-      slide.classList.add(randomKb());
-      const img = slide.querySelector('img');
-      if (img) { img.style.animation = 'none'; void img.offsetWidth; img.style.animation = ''; }
-
       slide.classList.add('active');
       dots[currentSlide]?.classList.add('active');
 
