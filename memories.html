@@ -211,8 +211,10 @@
       const authorEl = document.getElementById('quoteOverlayAuthor');
 
       textEl.innerHTML = escapeHtml(q.text);
-      authorEl.innerHTML = q.author ? '— ' + escapeHtml(q.author) : '';
-      authorEl.style.display = q.author ? '' : 'none';
+      authorEl.innerHTML = q.author
+        ? '— ' + escapeHtml(q.author)
+        : '— <em style="text-decoration:line-through;">redacted</em>';
+      authorEl.style.display = '';
 
       overlay.classList.remove('visible');
       // Force reflow so the re-add triggers the transition
